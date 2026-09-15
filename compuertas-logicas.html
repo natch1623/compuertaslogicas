@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compuertas lógicas — siete maneras de decir «sí»</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#101A26;
+  --panel:#17232F;
+  --panel-2:#1E2C3A;
+  --line:#2F4356;
+  --cold:#7E97AC;
+  --paper:#E4EDF4;
+  --hot:#FFB020;
+  --hot-deep:#8A5A10;
+  --hot-glow:rgba(255,176,32,.28);
+  --r:10px;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--paper);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:940px;margin:0 auto;padding:0 22px}
+p{max-width:68ch}
+
+/* ---------- navegación del sitio ---------- */
+.sitenav{display:flex;gap:18px;flex-wrap:wrap;align-items:center;padding:20px 0 0;font-size:.9rem}
+.sitenav a{color:var(--cold);text-decoration:none;border-bottom:1px solid transparent}
+.sitenav a:hover{color:var(--paper);border-color:var(--cold)}
+.sitenav a[aria-current="page"]{color:var(--hot)}
+.sitenav .home{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;color:var(--paper);margin-right:auto}
+.tolab{
+  display:inline-block;margin-top:14px;color:#1A1206;background:var(--hot);font-weight:600;
+  text-decoration:none;padding:11px 22px;border-radius:99px;
+}
+.tolab:hover{filter:brightness(1.08)}
+
+/* ---------- hero ---------- */
+header{padding:52px 0 8px}
+h1{
+  font-family:"Bricolage Grotesque",sans-serif;
+  font-weight:800;
+  font-size:clamp(2.5rem,7.5vw,4.6rem);
+  line-height:.98;
+  letter-spacing:-.03em;
+  margin:0 0 20px;
+  max-width:15ch;
+}
+.lede{font-size:1.14rem;color:var(--cold);max-width:56ch;margin:0}
+.lede b{color:var(--paper);font-weight:500}
+
+/* ---------- bench ---------- */
+.bench{
+  margin:44px 0 0;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  overflow:hidden;
+}
+.bench-top{
+  display:grid;
+  grid-template-columns:104px 1fr 110px;
+  grid-template-areas:"a s l" "b s l";
+  align-items:center;
+  justify-items:center;
+  gap:10px 18px;
+  padding:34px 26px 30px;
+}
+#swA{grid-area:a}
+#swB{grid-area:b}
+.stage{grid-area:s}
+.lamp{grid-area:l}
+.bench-top[data-single="1"]{grid-template-areas:"a s l" "a s l"}
+
+.sw{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  background:none;border:0;padding:8px;cursor:pointer;
+  font-family:inherit;color:var(--cold);border-radius:var(--r);
+}
+.sw:focus-visible{outline:2px solid var(--hot);outline-offset:3px}
+.sw-name{font-family:"IBM Plex Mono",monospace;font-size:.9rem;letter-spacing:.06em}
+.sw-body{
+  width:52px;height:88px;border-radius:26px;
+  background:var(--panel-2);border:1px solid var(--line);
+  position:relative;transition:border-color .18s,background .18s;
+}
+.sw-knob{
+  position:absolute;left:5px;right:5px;height:38px;top:44px;
+  border-radius:19px;background:#3C536A;
+  transition:top .18s cubic-bezier(.3,1.5,.5,1),background .18s;
+}
+.sw[data-on="1"] .sw-body{border-color:var(--hot);background:#26221A}
+.sw[data-on="1"] .sw-knob{top:4px;background:var(--hot);box-shadow:0 0 18px var(--hot-glow)}
+.sw-val{font-family:"IBM Plex Mono",monospace;font-size:1.5rem;font-weight:600;color:var(--cold);transition:color .18s}
+.sw[data-on="1"] .sw-val{color:var(--hot)}
+.sw[hidden]{display:none}
+
+.stage{display:flex;justify-content:center;align-items:center;min-height:150px}
+.stage svg{width:100%;max-width:330px;height:auto}
+.w{stroke:var(--line);stroke-width:3;fill:none;stroke-linecap:round;transition:stroke .18s}
+.w.hot{stroke:var(--hot)}
+.gbody{fill:var(--panel-2);stroke:var(--cold);stroke-width:3;stroke-linejoin:round}
+.gmark{fill:none;stroke:var(--cold);stroke-width:3}
+.bub{fill:var(--panel);stroke:var(--cold);stroke-width:3}
+.pin{font-family:"IBM Plex Mono",monospace;font-size:13px;fill:var(--cold)}
+
+.lamp{display:flex;flex-direction:column;align-items:center;gap:10px}
+.bulb{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--panel-2);border:1px solid var(--line);
+  display:grid;place-items:center;
+  transition:background .2s,box-shadow .2s,border-color .2s;
+}
+.bulb i{
+  width:22px;height:22px;border-radius:50%;background:#3C536A;display:block;
+  transition:background .2s;
+}
+.bulb.on{background:#2A2417;border-color:var(--hot);box-shadow:0 0 34px var(--hot-glow),inset 0 0 14px rgba(255,176,32,.15)}
+.bulb.on i{background:var(--hot);box-shadow:0 0 16px var(--hot)}
+.lamp span{font-family:"IBM Plex Mono",monospace;font-size:.9rem;color:var(--cold)}
+.lamp .out{font-size:1.5rem;font-weight:600;transition:color .18s}
+.bulb.on + .out{color:var(--hot)}
+
+/* ---------- picker ---------- */
+.picker{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:16px 26px;border-top:1px solid var(--line);
+  background:var(--ink);
+}
+.picker button{
+  font-family:"IBM Plex Mono",monospace;font-size:.92rem;
+  padding:8px 15px;border-radius:99px;cursor:pointer;
+  background:transparent;border:1px solid var(--line);color:var(--cold);
+  transition:.15s;
+}
+.picker button:hover{border-color:var(--cold);color:var(--paper)}
+.picker button[aria-pressed="true"]{background:var(--hot);border-color:var(--hot);color:#1A1206;font-weight:600}
+.picker button:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+
+/* ---------- readout ---------- */
+.readout{
+  display:grid;grid-template-columns:1fr 260px;gap:30px;
+  padding:28px 26px 32px;border-top:1px solid var(--line);
+}
+.readout h2{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:600;
+  font-size:1.7rem;margin:0 0 4px;letter-spacing:-.015em;
+}
+.expr{font-family:"IBM Plex Mono",monospace;font-size:1.05rem;color:var(--hot);margin:0 0 16px}
+.rule{margin:0 0 14px;max-width:44ch}
+.story{margin:0;color:var(--cold);font-size:.97rem;max-width:44ch;border-left:2px solid var(--line);padding-left:14px}
+
+table{border-collapse:collapse;font-family:"IBM Plex Mono",monospace;font-size:1rem;width:100%}
+th{
+  font-weight:400;color:var(--cold);font-size:.78rem;
+  padding:0 0 8px;border-bottom:1px solid var(--line);text-align:center;
+}
+td{padding:7px 0;text-align:center;color:var(--cold);transition:.18s;border-radius:4px}
+tr.live td{background:var(--panel-2);color:var(--paper)}
+tr.live td:last-child{color:var(--hot);font-weight:600}
+td.s{font-weight:600}
+
+/* ---------- sections ---------- */
+section{padding:78px 0 0}
+h3{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:600;
+  font-size:clamp(1.6rem,3.6vw,2.2rem);letter-spacing:-.02em;
+  margin:0 0 10px;
+}
+.sub{color:var(--cold);margin:0 0 30px}
+
+.brick{
+  display:grid;grid-template-columns:190px 1fr;gap:26px;align-items:center;
+  padding:22px 0;border-top:1px solid var(--line);
+}
+.brick:last-of-type{border-bottom:1px solid var(--line)}
+.brick svg{width:100%;height:auto}
+.brick h4{
+  font-family:"IBM Plex Mono",monospace;font-size:1rem;font-weight:600;
+  margin:0 0 6px;color:var(--paper);
+}
+.brick p{margin:0;font-size:.97rem;color:var(--cold)}
+.node{fill:var(--line);transition:fill .18s}
+.node.hot{fill:var(--hot)}
+.blade{stroke:var(--cold);stroke-width:3.5;stroke-linecap:round;transition:stroke .18s,transform .2s cubic-bezier(.3,1.4,.5,1)}
+.blade.hot{stroke:var(--hot)}
+.mini-bulb{fill:var(--panel-2);stroke:var(--line);stroke-width:2.5;transition:.2s}
+.mini-bulb.on{fill:#2A2417;stroke:var(--hot)}
+.mini-x{stroke:var(--line);stroke-width:2;transition:.2s}
+.mini-x.on{stroke:var(--hot)}
+
+/* ---------- universal ---------- */
+.note{
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--hot);
+  border-radius:var(--r);padding:22px 24px;margin-top:26px;
+}
+.note p{margin:0;max-width:62ch}
+.note p + p{margin-top:12px}
+
+/* ---------- quiz ---------- */
+.quiz{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:26px}
+.quiz-grid{display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:start}
+.quiz table{max-width:180px}
+.quiz .opts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.quiz .opts button{
+  font-family:"IBM Plex Mono",monospace;font-size:.9rem;padding:8px 14px;
+  border-radius:99px;background:transparent;border:1px solid var(--line);
+  color:var(--cold);cursor:pointer;transition:.15s;
+}
+.quiz .opts button:hover:not(:disabled){border-color:var(--cold);color:var(--paper)}
+.quiz .opts button:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.quiz .opts button.right{background:var(--hot);border-color:var(--hot);color:#1A1206;font-weight:600}
+.quiz .opts button.wrong{border-color:#6E4040;color:#C58A8A}
+.quiz .opts button:disabled{cursor:default}
+.feedback{margin:0;min-height:3.2em;font-size:.97rem;color:var(--cold);max-width:50ch}
+.feedback b{color:var(--paper);font-weight:500}
+.again{
+  margin-top:16px;font-family:inherit;font-size:.92rem;padding:9px 18px;
+  border-radius:99px;background:transparent;border:1px solid var(--line);
+  color:var(--paper);cursor:pointer;
+}
+.again:hover{border-color:var(--hot)}
+.again:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.score{font-family:"IBM Plex Mono",monospace;font-size:.86rem;color:var(--cold);margin-top:14px}
+
+/* ---------- refs ---------- */
+footer{padding:78px 0 90px;margin-top:60px;border-top:1px solid var(--line)}
+footer h3{font-size:1.25rem;margin-bottom:18px}
+.refs{list-style:none;padding:0;margin:0;font-size:.92rem;color:var(--cold);max-width:74ch}
+.refs li{padding-left:1.6em;text-indent:-1.6em;margin-bottom:11px;line-height:1.55}
+.refs em{font-style:italic;color:var(--paper)}
+.made{margin-top:26px;font-size:.85rem;color:var(--line)}
+
+@media (max-width:760px){
+  body{font-size:16px}
+  .bench-top{grid-template-columns:1fr 1fr;grid-template-areas:"a b" "s s" "l l";gap:18px;padding:26px 18px}
+  .bench-top[data-single="1"]{grid-template-areas:"a a" "s s" "l l"}
+  .readout{grid-template-columns:1fr;gap:24px;padding:24px 18px}
+  .picker{padding:14px 18px}
+  .brick{grid-template-columns:1fr;gap:14px}
+  .quiz-grid{grid-template-columns:1fr;gap:22px}
+  .quiz table{max-width:200px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<nav class="sitenav" aria-label="Sitio">
+  <a class="home" href="./">Compuertas lógicas</a>
+  <a href="compuertas-logicas.html" aria-current="page">Aprende las compuertas</a>
+  <a href="juego-compuertas.html">Taller de juegos</a>
+</nav>
+
+<header>
+  <h1>Siete maneras de decir «sí»</h1>
+  <p class="lede">Una compuerta lógica no calcula: <b>decide si deja pasar la corriente</b>. Mueve los dos interruptores, cambia la compuerta y observa cuándo se enciende la lámpara.</p>
+</header>
+
+<div class="bench">
+  <div class="bench-top">
+    <button class="sw" id="swA" data-on="0" aria-label="Interruptor A">
+      <span class="sw-name">A</span>
+      <span class="sw-body"><span class="sw-knob"></span></span>
+      <span class="sw-val">0</span>
+    </button>
+
+    <div class="stage" id="stage"></div>
+
+    <button class="sw" id="swB" data-on="0" aria-label="Interruptor B">
+      <span class="sw-name">B</span>
+      <span class="sw-body"><span class="sw-knob"></span></span>
+      <span class="sw-val">0</span>
+    </button>
+
+    <div class="lamp" id="lamp">
+      <div class="bulb" id="bulb"><i></i></div>
+      <span class="out" id="outVal">0</span>
+      <span>S</span>
+    </div>
+  </div>
+
+  <div class="picker" id="picker" role="group" aria-label="Elegir compuerta"></div>
+
+  <div class="readout">
+    <div>
+      <h2 id="gName"></h2>
+      <p class="expr" id="gExpr"></p>
+      <p class="rule" id="gRule"></p>
+      <p class="story" id="gStory"></p>
+    </div>
+    <div>
+      <table id="tt"></table>
+    </div>
+  </div>
+</div>
+
+<section>
+  <h3>Los tres ladrillos</h3>
+  <p class="sub">Todo lo anterior sale de tres circuitos de interruptores. Los de arriba siguen mandando: muévelos y mira qué pasa aquí abajo.</p>
+
+  <div class="brick">
+    <svg viewBox="0 0 280 90" id="ckSerie" aria-hidden="true"></svg>
+    <div>
+      <h4>AND — interruptores en serie</h4>
+      <p>La corriente tiene un solo camino y debe atravesar los dos interruptores. Si uno se abre, se acabó. Es la lógica de una prensa industrial que exige la guarda cerrada <em>y</em> el pulsador oprimido.</p>
+    </div>
+  </div>
+
+  <div class="brick">
+    <svg viewBox="0 0 280 120" id="ckPar" aria-hidden="true"></svg>
+    <div>
+      <h4>OR — interruptores en paralelo</h4>
+      <p>Hay dos caminos hacia la lámpara. Con que uno esté cerrado, la corriente pasa. Es la lógica de los paros de emergencia repartidos por el taller: cualquiera basta.</p>
+    </div>
+  </div>
+
+  <div class="brick">
+    <svg viewBox="0 0 280 90" id="ckNot" aria-hidden="true"></svg>
+    <div>
+      <h4>NOT — contacto normalmente cerrado</h4>
+      <p>El contacto conduce mientras nadie lo acciona y se abre cuando A sube. Invierte lo que recibe. Es la luz de «puerta abierta»: se enciende justo cuando la condición no se cumple.</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <p>De estos tres salen los otros cuatro. NAND es una AND con un inversor pegado a la salida; NOR es una OR invertida; XOR se arma con AND, OR y NOT combinadas.</p>
+    <p>Y hay algo más fuerte: con solo compuertas NAND —o solo NOR— puedes construir cualquier función lógica que exista, incluidas AND, OR y NOT. Por eso se les llama <em>compuertas universales</em> y por eso las familias TTL y CMOS fabrican NAND antes que nada: sale más barato repetir una sola pieza (Mano y Ciletti, 2013, cap. 2).</p>
+  </div>
+</section>
+
+<section>
+  <h3>Adivina la compuerta</h3>
+  <p class="sub">Te doy la tabla de verdad sin el nombre. Identifícala.</p>
+
+  <div class="quiz">
+    <div class="quiz-grid">
+      <table id="qtt"></table>
+      <div>
+        <div class="opts" id="qopts"></div>
+        <p class="feedback" id="qfb">Lee la columna S y pregúntate cuándo vale 1.</p>
+        <button class="again" id="qnext" hidden>Siguiente tabla</button>
+        <div class="score" id="qscore">Aciertos 0 de 0</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h3>¿Listo para armar circuitos?</h3>
+  <p class="sub">Veinte niveles en dos juegos y un modo sin final que genera circuitos nuevos cada ronda.</p>
+  <a class="tolab" href="juego-compuertas.html">Ir al taller de juegos</a>
+</section>
+
+<footer>
+  <h3>De dónde sale todo esto</h3>
+  <ul class="refs">
+    <li>Boole, G. (1854). <em>An Investigation of the Laws of Thought</em>. Walton &amp; Maberly. — El álgebra de dos valores, cincuenta años antes de que existiera un circuito que la usara.</li>
+    <li>Shannon, C. E. (1938). A symbolic analysis of relay and switching circuits. <em>Transactions of the AIEE, 57</em>(12), 713–723. — La tesis de maestría que conectó el álgebra de Boole con los interruptores en serie y en paralelo. Es la idea que estructura este material.</li>
+    <li>Mano, M. M., y Ciletti, M. D. (2013). <em>Diseño digital</em> (5.ª ed.). Pearson. — Cap. 2: álgebra booleana y compuertas universales.</li>
+    <li>Tocci, R. J., Widmer, N. S., y Moss, G. L. (2017). <em>Sistemas digitales: principios y aplicaciones</em> (11.ª ed.). Pearson. — Cap. 3: descripción de cada compuerta y sus tablas de verdad.</li>
+    <li>Floyd, T. L. (2015). <em>Fundamentos de sistemas digitales</em> (11.ª ed.). Pearson. — Cap. 3: compuertas lógicas, incluidas XOR y XNOR y sus aplicaciones.</li>
+    <li>IEEE. (1984). <em>IEEE Std 91-1984: Graphic Symbols for Logic Functions</em>. — Norma de la que provienen los símbolos distintivos usados en esta página.</li>
+  </ul>
+  <p class="made">Material de apoyo — Fundamentos de Electrónica</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ---------------- datos ---------------- */
+const GATES = {
+  AND: {
+    label:"AND", name:"AND — la conjunción", expr:"S = A · B", inputs:2,
+    f:(a,b)=>a&&b,
+    rule:"Enciende solo si los dos interruptores están arriba. Un solo 0 apaga todo.",
+    story:"Es el arranque de una prensa: la guarda tiene que estar cerrada y el operario tiene que oprimir el pulsador. Cualquiera de los dos falla y la máquina no se mueve."
+  },
+  OR: {
+    label:"OR", name:"OR — la disyunción", expr:"S = A + B", inputs:2,
+    f:(a,b)=>a||b,
+    rule:"Basta con que uno esté arriba. Solo se apaga cuando ambos están abajo.",
+    story:"Son los paros de emergencia repartidos por el taller: no importa cuál se accione, el resultado es el mismo."
+  },
+  NOT: {
+    label:"NOT", name:"NOT — el inversor", expr:"S = A\u0305", inputs:1,
+    f:(a)=>!a,
+    rule:"Devuelve lo contrario de lo que recibe. Es la única compuerta de una sola entrada.",
+    story:"Es la luz de «puerta abierta» del tablero: se enciende precisamente cuando la condición no se cumple."
+  },
+  NAND: {
+    label:"NAND", name:"NAND — la negación de AND", expr:"S = A · B", inputs:2, over:true,
+    f:(a,b)=>!(a&&b),
+    rule:"Se apaga únicamente cuando los dos están arriba. En todo lo demás conduce.",
+    story:"Es la alarma que suena mientras el sistema no esté completamente listo, y calla solo cuando ambas condiciones se cumplen. Con NAND sola se construye cualquier circuito lógico."
+  },
+  NOR: {
+    label:"NOR", name:"NOR — la negación de OR", expr:"S = A + B", inputs:2, over:true,
+    f:(a,b)=>!(a||b),
+    rule:"Enciende solo cuando todo está abajo. Cualquier entrada en 1 la apaga.",
+    story:"Es el testigo de «línea en reposo»: vigila que nadie esté pidiendo nada. También es una compuerta universal."
+  },
+  XOR: {
+    label:"XOR", name:"XOR — el o exclusivo", expr:"S = A \u2295 B", inputs:2,
+    f:(a,b)=>(!!a)!==(!!b),
+    rule:"Enciende cuando las entradas son distintas y se apaga cuando son iguales.",
+    story:"Es la escalera con dos conmutadores: cambias cualquiera de los dos y la luz cambia de estado. También es el bloque que hace la suma binaria dentro de un sumador."
+  },
+  XNOR: {
+    label:"XNOR", name:"XNOR — el comparador", expr:"S = A \u2299 B", inputs:2,
+    f:(a,b)=>(!!a)===(!!b),
+    rule:"Enciende cuando las entradas son iguales. Es el espejo de XOR.",
+    story:"Responde a una sola pregunta: ¿estos dos bits coinciden? Es la pieza básica de los circuitos que comparan números binarios."
+  }
+};
+const ORDER = ["AND","OR","NOT","NAND","NOR","XOR","XNOR"];
+
+/* ---------------- símbolos ---------------- */
+function gateSVG(key){
+  const g = GATES[key];
+  const one = g.inputs === 1;
+  let shape="", extra="", nose=90, bubble=false;
+
+  if(key==="AND"||key==="NAND"){
+    shape = 'M20,8 H58 A32,32 0 0 1 58,72 H20 Z'; nose = 90; bubble = key==="NAND";
+  } else if(key==="OR"||key==="NOR"){
+    shape = 'M20,8 C44,8 70,18 92,40 C70,62 44,72 20,72 C32,52 32,28 20,8 Z'; nose = 92; bubble = key==="NOR";
+  } else if(key==="XOR"||key==="XNOR"){
+    shape = 'M26,8 C50,8 76,18 98,40 C76,62 50,72 26,72 C38,52 38,28 26,8 Z';
+    extra = '<path class="gmark" d="M12,8 C24,28 24,52 12,72"/>'; nose = 98; bubble = key==="XNOR";
+  } else { // NOT
+    shape = 'M30,8 L78,40 L30,72 Z'; nose = 78; bubble = true;
+  }
+
+  const outStart = bubble ? nose+13 : nose;
+  const inEndA = (key==="XOR"||key==="XNOR") ? 40 : (key==="NOT" ? 30 : 34);
+
+  const inputs = one
+    ? `<path class="w" id="wA" d="M0,40 H${inEndA}"/>`
+    : `<path class="w" id="wA" d="M0,24 H${inEndA}"/><path class="w" id="wB" d="M0,56 H${inEndA}"/>`;
+
+  const labels = one
+    ? `<text class="pin" x="4" y="32">A</text>`
+    : `<text class="pin" x="4" y="16">A</text><text class="pin" x="4" y="76">B</text>`;
+
+  return `<svg viewBox="-2 0 132 80" role="img" aria-label="Símbolo de la compuerta ${key}">
+    ${inputs}
+    <path class="w" id="wS" d="M${outStart},40 H128"/>
+    ${extra}
+    <path class="gbody" d="${shape}"/>
+    ${bubble ? `<circle class="bub" cx="${nose+6.5}" cy="40" r="6.5"/>` : ``}
+    ${labels}
+    <text class="pin" x="112" y="32">S</text>
+  </svg>`;
+}
+
+/* ---------------- estado ---------------- */
+const state = { a:0, b:0, gate:"AND" };
+const $ = id => document.getElementById(id);
+
+function out(){
+  const g = GATES[state.gate];
+  return (g.inputs===1 ? g.f(state.a) : g.f(state.a, state.b)) ? 1 : 0;
+}
+
+/* ---------------- selector ---------------- */
+$("picker").innerHTML = ORDER.map(k =>
+  `<button data-g="${k}" aria-pressed="${k===state.gate}">${k}</button>`).join("");
+$("picker").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  state.gate = b.dataset.g; render();
+});
+
+/* ---------------- interruptores ---------------- */
+$("swA").addEventListener("click", ()=>{ state.a ^= 1; render(); });
+$("swB").addEventListener("click", ()=>{ state.b ^= 1; render(); });
+
+/* ---------------- tabla ---------------- */
+function tableHTML(key, live){
+  const g = GATES[key], one = g.inputs===1;
+  const rows = one ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
+  const head = one ? "<tr><th>A</th><th>S</th></tr>"
+                   : "<tr><th>A</th><th>B</th><th>S</th></tr>";
+  const body = rows.map(r=>{
+    const s = (one ? g.f(r[0]) : g.f(r[0], r[1])) ? 1 : 0;
+    const isLive = live && r[0]===state.a && (one || r[1]===state.b);
+    const cells = r.map(v=>`<td>${v}</td>`).join("");
+    return `<tr class="${isLive?"live":""}">${cells}<td class="s">${s}</td></tr>`;
+  }).join("");
+  return head + body;
+}
+
+/* ---------------- circuitos de interruptores ---------------- */
+function blade(x, y, open){
+  const rot = open ? `rotate(-30 ${x} ${y})` : "";
+  return `<line class="blade" x1="${x}" y1="${y}" x2="${x+44}" y2="${y}" transform="${rot}"/>`;
+}
+function wire(x1,y1,x2,y2,hot){
+  return `<line class="w ${hot?"hot":""}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+}
+function bulbSVG(cx,cy,on){
+  return `<circle class="mini-bulb ${on?"on":""}" cx="${cx}" cy="${cy}" r="15"/>
+          <line class="mini-x ${on?"on":""}" x1="${cx-10}" y1="${cy-10}" x2="${cx+10}" y2="${cy+10}"/>
+          <line class="mini-x ${on?"on":""}" x1="${cx+10}" y1="${cy-10}" x2="${cx-10}" y2="${cy+10}"/>`;
+}
+function src(x,y,hot){
+  return `<circle class="node ${hot?"hot":""}" cx="${x}" cy="${y}" r="5"/>
+          <text class="pin" x="${x-8}" y="${y-14}">+V</text>`;
+}
+
+function drawCircuits(){
+  const a = state.a, b = state.b;
+
+  // AND — serie
+  $("ckSerie").innerHTML =
+    src(12,50,true) +
+    wire(12,50,58,50,true) +
+    wire(102,50,148,50,a) +
+    wire(192,50,222,50,a&&b) +
+    blade(58,50,!a) + blade(148,50,!b) +
+    `<circle class="node hot" cx="58" cy="50" r="4"/>
+     <circle class="node ${a?"hot":""}" cx="102" cy="50" r="4"/>
+     <circle class="node ${a?"hot":""}" cx="148" cy="50" r="4"/>
+     <circle class="node ${(a&&b)?"hot":""}" cx="192" cy="50" r="4"/>` +
+    bulbSVG(240,50,a&&b) +
+    `<text class="pin" x="66" y="30">A</text><text class="pin" x="156" y="30">B</text>`;
+
+  // OR — paralelo
+  const anyOn = a||b;
+  $("ckPar").innerHTML =
+    src(12,60,true) +
+    wire(12,60,52,60,true) +
+    wire(52,26,52,94,true) +
+    wire(52,26,74,26,true) + wire(52,94,74,94,true) +
+    wire(118,26,196,26,a) + wire(118,94,196,94,b) +
+    blade(74,26,!a) + blade(74,94,!b) +
+    wire(196,26,196,94,anyOn) +
+    wire(196,60,222,60,anyOn) +
+    `<circle class="node hot" cx="52" cy="60" r="4"/>
+     <circle class="node ${anyOn?"hot":""}" cx="196" cy="60" r="4"/>` +
+    bulbSVG(240,60,anyOn) +
+    `<text class="pin" x="82" y="16">A</text><text class="pin" x="82" y="112">B</text>`;
+
+  // NOT — contacto normalmente cerrado
+  const nc = !a;
+  $("ckNot").innerHTML =
+    src(12,50,true) +
+    wire(12,50,58,50,true) +
+    wire(102,50,222,50,nc) +
+    blade(58,50,a) +
+    `<circle class="node hot" cx="58" cy="50" r="4"/>
+     <circle class="node ${nc?"hot":""}" cx="102" cy="50" r="4"/>` +
+    bulbSVG(240,50,nc) +
+    `<text class="pin" x="66" y="30">A</text>`;
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  const g = GATES[state.gate], one = g.inputs===1, s = out();
+
+  [...$("picker").children].forEach(b =>
+    b.setAttribute("aria-pressed", b.dataset.g===state.gate));
+
+  $("swA").dataset.on = state.a;
+  $("swA").querySelector(".sw-val").textContent = state.a;
+  $("swB").dataset.on = state.b;
+  $("swB").querySelector(".sw-val").textContent = state.b;
+  $("swB").hidden = one;
+  document.querySelector(".bench-top").dataset.single = one ? "1" : "0";
+
+  $("stage").innerHTML = gateSVG(state.gate);
+  const wA = document.getElementById("wA"); if(wA) wA.classList.toggle("hot", !!state.a);
+  const wB = document.getElementById("wB"); if(wB) wB.classList.toggle("hot", !!state.b);
+  const wS = document.getElementById("wS"); if(wS) wS.classList.toggle("hot", !!s);
+
+  $("bulb").classList.toggle("on", !!s);
+  $("outVal").textContent = s;
+  $("outVal").style.color = s ? "var(--hot)" : "var(--cold)";
+
+  $("gName").textContent = g.name;
+  $("gExpr").innerHTML = g.over
+    ? g.expr.replace(/S = (.+)/, 'S = <span style="text-decoration:overline">$1</span>')
+    : g.expr;
+  $("gRule").textContent = g.rule;
+  $("gStory").textContent = g.story;
+  $("tt").innerHTML = tableHTML(state.gate, true);
+
+  drawCircuits();
+}
+
+/* ---------------- reto ---------------- */
+let qKey=null, qDone=false, hits=0, tries=0;
+
+function newQuestion(){
+  const pool = ORDER.filter(k => k!=="NOT");
+  let next; do { next = pool[Math.floor(Math.random()*pool.length)]; } while(next===qKey && pool.length>1);
+  qKey = next; qDone = false;
+  $("qtt").innerHTML = tableHTML(qKey, false);
+  $("qopts").innerHTML = pool.map(k=>`<button data-q="${k}">${k}</button>`).join("");
+  $("qfb").innerHTML = "Lee la columna S y pregúntate cuándo vale 1.";
+  $("qnext").hidden = true;
+}
+
+$("qopts").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b || qDone) return;
+  qDone = true; tries++;
+  const ok = b.dataset.q === qKey;
+  if(ok) hits++;
+  [...$("qopts").children].forEach(x=>{
+    x.disabled = true;
+    if(x.dataset.q===qKey) x.classList.add("right");
+    else if(x===b) x.classList.add("wrong");
+  });
+  const g = GATES[qKey];
+  $("qfb").innerHTML = (ok ? "<b>Correcto.</b> " : "<b>Era " + qKey + ".</b> ") + g.rule;
+  $("qscore").textContent = `Aciertos ${hits} de ${tries}`;
+  $("qnext").hidden = false;
+  $("qnext").focus();
+});
+$("qnext").addEventListener("click", newQuestion);
+
+/* ---------------- arranque ---------------- */
+render();
+newQuestion();
+</script>
+</body>
+</html>

@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller de compuertas — dos juegos, veinte niveles y un modo sin final</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#101A26; --panel:#17232F; --panel-2:#1E2C3A; --line:#2F4356;
+  --cold:#7E97AC; --paper:#E4EDF4;
+  --hot:#FFB020; --glow:rgba(255,176,32,.28);
+  --bad:#C4776B;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--ink);color:var(--paper);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding:0 22px 90px}
+p{max-width:66ch}
+
+/* ---- navegación del sitio ---- */
+.sitenav{display:flex;gap:18px;flex-wrap:wrap;align-items:center;padding:20px 0 0;font-size:.9rem}
+.sitenav a{color:var(--cold);text-decoration:none;border-bottom:1px solid transparent}
+.sitenav a:hover{color:var(--paper);border-color:var(--cold)}
+.sitenav a[aria-current="page"]{color:var(--hot)}
+.sitenav .home{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;color:var(--paper);margin-right:auto}
+
+header{padding:48px 0 0}
+h1{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+  font-size:clamp(2.2rem,6.5vw,3.9rem);line-height:1;letter-spacing:-.03em;
+  margin:0 0 16px;max-width:16ch;
+}
+.lede{color:var(--cold);max-width:58ch;margin:0}
+
+/* ---- pestañas y modo ---- */
+.topbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:36px 0 0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{
+  font-family:inherit;font-size:.98rem;padding:11px 20px;border-radius:99px;
+  background:transparent;border:1px solid var(--line);color:var(--cold);
+  cursor:pointer;transition:.15s;
+}
+.tabs button:hover{border-color:var(--cold);color:var(--paper)}
+.tabs button[aria-selected="true"]{background:var(--hot);border-color:var(--hot);color:#1A1206;font-weight:600}
+.tabs button:focus-visible{outline:2px solid var(--hot);outline-offset:3px}
+
+.modes{margin-left:auto;display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:3px}
+.modes button{
+  font-family:inherit;font-size:.9rem;padding:8px 16px;border-radius:99px;border:0;
+  background:transparent;color:var(--cold);cursor:pointer;transition:.15s;
+}
+.modes button:hover{color:var(--paper)}
+.modes button[aria-pressed="true"]{background:var(--panel-2);color:var(--paper);font-weight:500}
+.modes button:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+
+/* ---- caja de juego ---- */
+.game{margin-top:20px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+
+.rail{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line);background:var(--ink);min-height:69px}
+.rail button[data-lv]{
+  width:36px;height:36px;border-radius:8px;cursor:pointer;
+  font-family:"IBM Plex Mono",monospace;font-size:.88rem;
+  background:transparent;border:1px solid var(--line);color:var(--cold);transition:.15s;
+}
+.rail button[data-lv]:hover{border-color:var(--cold);color:var(--paper)}
+.rail button[aria-current="true"]{border-color:var(--hot);color:var(--hot)}
+.rail button.done{background:var(--hot);border-color:var(--hot);color:#1A1206;font-weight:600}
+.rail button.done[aria-current="true"]{box-shadow:0 0 0 2px var(--ink),0 0 0 4px var(--hot)}
+.rail button:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.railsum{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:.84rem;color:var(--cold)}
+.railsum b{color:var(--hot);font-weight:600}
+
+.stats{display:flex;gap:28px;flex-wrap:wrap;align-items:center;width:100%}
+.stat span{display:block;font-size:.7rem;color:var(--cold);text-transform:uppercase;letter-spacing:.09em;line-height:1.2}
+.stat b{font-family:"IBM Plex Mono",monospace;font-size:1.3rem;color:var(--paper);font-weight:600;line-height:1.3}
+.stat.hot b{color:var(--hot)}
+.linkbtn{
+  margin-left:auto;font-family:inherit;font-size:.86rem;padding:7px 14px;border-radius:99px;cursor:pointer;
+  background:transparent;border:1px solid var(--line);color:var(--cold);transition:.15s;
+}
+.linkbtn:hover{border-color:var(--cold);color:var(--paper)}
+
+.brief{padding:24px 22px 4px}
+.brief h2{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:1.45rem;
+  letter-spacing:-.015em;margin:0 0 8px;
+}
+.brief .task{margin:0;color:var(--paper);max-width:60ch}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:.8rem;padding:5px 12px;
+  border-radius:99px;border:1px solid var(--line);color:var(--cold);
+}
+.chip.aim{border-color:var(--hot);color:var(--hot)}
+
+.stage{padding:12px 10px 8px;overflow-x:auto;scrollbar-color:var(--line) transparent}
+.stage svg{display:block;margin:0 auto;height:auto}
+
+/* ---- svg del circuito ---- */
+.w{stroke:var(--line);stroke-width:2.5;fill:none;transition:stroke .16s}
+.w.hot{stroke:var(--hot)}
+.gbody{fill:var(--panel-2);stroke:var(--cold);stroke-width:2.5;stroke-linejoin:round}
+.gmark{fill:none;stroke:var(--cold);stroke-width:2.5}
+.bub{fill:var(--panel);stroke:var(--cold);stroke-width:2.5}
+.glabel{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--cold);text-anchor:middle}
+.pinlabel{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--cold)}
+
+.inode{cursor:pointer}
+.inode:focus{outline:none}
+.inode:focus-visible .ipill{stroke:var(--hot);stroke-width:3}
+.ipill{fill:var(--panel-2);stroke:var(--line);stroke-width:2;transition:.16s}
+.inode[data-on="1"] .ipill{fill:#26221A;stroke:var(--hot)}
+.iname{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600;fill:var(--cold);transition:fill .16s}
+.ival{font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:600;fill:var(--cold);transition:fill .16s}
+.inode[data-on="1"] .iname,.inode[data-on="1"] .ival{fill:var(--hot)}
+.inode.tip .ipill{stroke:var(--hot);stroke-width:3;stroke-dasharray:6 4;animation:march 1s linear infinite}
+@keyframes march{to{stroke-dashoffset:-20}}
+.stage.locked .inode{cursor:default}
+
+.slot{cursor:pointer}
+.slot:focus{outline:none}
+.empty{fill:var(--panel-2);stroke:var(--cold);stroke-width:2;stroke-dasharray:5 4}
+.qmark{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:600;fill:var(--cold);text-anchor:middle}
+.slot.sel .empty,.slot.sel .gbody,.slot.sel .bub{stroke:var(--hot);stroke-width:3}
+.slot.sel .qmark,.slot.sel .glabel{fill:var(--hot)}
+.slot:focus-visible .empty,.slot:focus-visible .gbody{stroke:var(--hot);stroke-width:3}
+.slot.revealed .glabel{fill:var(--paper)}
+.stage.locked .slot{cursor:default}
+
+.olamp{fill:var(--panel-2);stroke:var(--line);stroke-width:2.5;transition:.2s}
+.olamp.on{fill:#2A2417;stroke:var(--hot)}
+.ofil{fill:#3C536A;transition:.2s}
+.ofil.on{fill:var(--hot)}
+.stage.won .olamp{filter:drop-shadow(0 0 10px rgba(255,176,32,.65))}
+.stage.pop .ofil{transform-box:fill-box;transform-origin:center;animation:pop .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(2.1)}100%{transform:scale(1)}}
+
+/* ---- controles ---- */
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 22px 20px;border-top:1px solid var(--line)}
+.ctrl button{
+  font-family:inherit;font-size:.92rem;padding:9px 17px;border-radius:99px;cursor:pointer;
+  background:transparent;border:1px solid var(--line);color:var(--paper);transition:.15s;
+}
+.ctrl button:hover{border-color:var(--cold)}
+.ctrl button:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.ctrl .go{background:var(--hot);border-color:var(--hot);color:#1A1206;font-weight:600}
+.ctrl .go:hover{filter:brightness(1.08)}
+.count{font-family:"IBM Plex Mono",monospace;font-size:.84rem;color:var(--cold);margin-left:auto}
+
+.msg{padding:0 22px 14px;margin:0;font-size:.97rem;color:var(--cold);max-width:66ch;min-height:1.6em}
+.msg.win{color:var(--hot)}
+.msg b{color:var(--paper);font-weight:500}
+.msg.win b{color:var(--hot);font-weight:600}
+.stars{letter-spacing:.12em;white-space:nowrap}
+.keys{padding:0 22px 20px;margin:0;font-size:.8rem;color:var(--cold);max-width:none}
+kbd{
+  font-family:"IBM Plex Mono",monospace;font-size:.76rem;padding:1px 6px;border-radius:5px;
+  border:1px solid var(--line);border-bottom-width:2px;color:var(--paper);background:var(--panel-2);
+}
+
+/* ---- paleta juego B ---- */
+.palette{padding:4px 22px 18px;border-top:1px solid var(--line)}
+.palette .lab{font-size:.88rem;color:var(--cold);margin:14px 0 10px}
+.palette .row{display:flex;gap:7px;flex-wrap:wrap}
+.palette button{
+  font-family:"IBM Plex Mono",monospace;font-size:.86rem;padding:8px 14px;border-radius:8px;
+  background:transparent;border:1px solid var(--line);color:var(--cold);cursor:pointer;transition:.15s;
+}
+.palette button .kn{font-size:.7rem;opacity:.55;margin-right:7px}
+.palette button:hover:not(:disabled){border-color:var(--cold);color:var(--paper)}
+.palette button[aria-pressed="true"]{border-color:var(--hot);color:var(--hot)}
+.palette button:disabled{opacity:.32;cursor:not-allowed}
+.palette button:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.palette button.clear{border-style:dashed}
+
+/* ---- tabla ---- */
+.tblbox{padding:0 22px 22px}
+.tblscroll{max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;font-family:"IBM Plex Mono",monospace;font-size:.92rem;width:100%}
+thead th{
+  position:sticky;top:0;background:var(--panel-2);z-index:1;
+  font-weight:400;color:var(--cold);font-size:.74rem;padding:8px 4px;text-align:center;
+  border-bottom:1px solid var(--line);
+}
+td{padding:5px 4px;text-align:center;color:var(--cold);border-bottom:1px solid rgba(47,67,86,.4)}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:rgba(47,67,86,.35)}
+tbody tr:last-child td{border-bottom:0}
+td.meta{color:var(--paper)}
+tr.ok td.mine{color:var(--hot);font-weight:600}
+tr.no td.mine{color:var(--bad);font-weight:600}
+tr.probe td,tr.probe:hover td{background:var(--panel-2);color:var(--paper)}
+.legend{font-size:.82rem;color:var(--cold);margin:10px 0 0}
+
+footer{border-top:1px solid var(--line);margin-top:60px;padding-top:34px}
+footer h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:1.2rem;margin:0 0 16px}
+.refs{list-style:none;padding:0;margin:0;font-size:.9rem;color:var(--cold);max-width:74ch}
+.refs li{padding-left:1.6em;text-indent:-1.6em;margin-bottom:10px;line-height:1.55}
+.refs em{font-style:italic;color:var(--paper)}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .wrap{padding:0 16px 70px}
+  .brief,.ctrl,.msg,.keys,.palette,.tblbox,.rail{padding-left:16px;padding-right:16px}
+  .count{margin-left:0;width:100%}
+  .modes{margin-left:0}
+  .stats{gap:18px}
+  .keys{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important;animation-duration:.01ms !important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<nav class="sitenav" aria-label="Sitio">
+  <a class="home" href="./">Compuertas lógicas</a>
+  <a href="compuertas-logicas.html">Aprende las compuertas</a>
+  <a href="juego-compuertas.html" aria-current="page">Taller de juegos</a>
+</nav>
+
+<header>
+  <h1>Taller de compuertas</h1>
+  <p class="lede">Dos juegos. En el primero el circuito ya está armado y tú controlas las señales. En el segundo las señales mandan y tú decides qué compuerta va en cada hueco. Supera los diez niveles de cada uno o juega sin final: circuitos nuevos que se vuelven más difíciles cada ronda.</p>
+</header>
+
+<div class="topbar">
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tabA" aria-selected="true">Enciende la salida</button>
+    <button role="tab" id="tabB" aria-selected="false">Arma el circuito</button>
+  </div>
+  <div class="modes" role="group" aria-label="Modo de juego">
+    <button id="playLevels" aria-pressed="true">Niveles</button>
+    <button id="playEndless" aria-pressed="false">Sin final</button>
+  </div>
+</div>
+
+<div class="game">
+  <div class="rail" id="rail"></div>
+
+  <div class="brief">
+    <h2 id="lvTitle"></h2>
+    <p class="task" id="lvTask"></p>
+    <div class="chips" id="lvChips"></div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="palette" id="palette" hidden>
+    <p class="lab" id="palLab">Toca un hueco del circuito para elegir su compuerta.</p>
+    <div class="row" id="palRow"></div>
+  </div>
+
+  <div class="tblbox" id="tblbox" hidden>
+    <div class="tblscroll"><table id="tbl"></table></div>
+    <p class="legend">La fila resaltada es la combinación que tienes en los interruptores. Toca cualquier fila para probarla.</p>
+  </div>
+
+  <div class="ctrl">
+    <button id="btnReset">Reiniciar</button>
+    <button id="btnHint">Pista</button>
+    <button id="btnSkip" hidden>Saltar circuito</button>
+    <button id="btnNext" class="go" hidden>Siguiente nivel</button>
+    <span class="count" id="count"></span>
+  </div>
+
+  <p class="msg" id="msg" aria-live="polite"></p>
+  <p class="keys" id="keys"></p>
+</div>
+
+<footer>
+  <h3>Referencias</h3>
+  <ul class="refs">
+    <li>Shannon, C. E. (1938). A symbolic analysis of relay and switching circuits. <em>Transactions of the AIEE, 57</em>(12), 713–723.</li>
+    <li>Mano, M. M., y Ciletti, M. D. (2013). <em>Diseño digital</em> (5.ª ed.). Pearson. Cap. 2–3: álgebra booleana, simplificación y compuertas universales.</li>
+    <li>Tocci, R. J., Widmer, N. S., y Moss, G. L. (2017). <em>Sistemas digitales: principios y aplicaciones</em> (11.ª ed.). Pearson. Cap. 3–4.</li>
+    <li>Floyd, T. L. (2015). <em>Fundamentos de sistemas digitales</em> (11.ª ed.). Pearson. Cap. 3 y 5: compuertas y circuitos combinacionales.</li>
+    <li>IEEE. (1984). <em>IEEE Std 91-1984: Graphic Symbols for Logic Functions</em>. Símbolos distintivos empleados en los esquemas.</li>
+  </ul>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============ lógica ============ */
+const F = {
+  AND:(a,b)=>a&&b, OR:(a,b)=>a||b, NAND:(a,b)=>!(a&&b), NOR:(a,b)=>!(a||b),
+  XOR:(a,b)=>a!==b, XNOR:(a,b)=>a===b, NOT:(a)=>!a, BUF:(a)=>a
+};
+const P2 = ["AND","OR","NAND","NOR","XOR","XNOR"];
+const P1 = ["NOT","BUF"];
+const NEG = {NAND:1,NOR:1,XNOR:1,NOT:1};
+const NAMES = ["A","B","C","D","E"];
+
+const rand = n => Math.floor(Math.random()*n);
+const pick = arr => arr[rand(arr.length)];
+const popcount = m => { let c=0; while(m){ c+=m&1; m>>=1; } return c; };
+const maskToVals = (m,k) => Array.from({length:k}, (_,i)=>(m>>(k-1-i))&1);
+const valsToMask = vals => vals.reduce((acc,v)=>(acc<<1)|v, 0);
+const plural = (n, one, many) => `${n} ${n===1?one:many}`;
+
+/* ============ niveles — juego A ============ */
+const LA = [
+{title:"Dos condiciones", task:"Enciende la salida.", hint:"Una compuerta AND exige las dos entradas arriba. No hay atajo.",
+ inputs:["A","B"], gates:[{id:"S",type:"AND",ins:["A","B"]}], goal:1},
+
+{title:"Apágala", task:"Ahora al revés: deja la salida en 0.", hint:"Una OR conduce con que sobre una entrada. Para apagarla tienes que bajar todas.",
+ inputs:["A","B"], gates:[{id:"S",type:"OR",ins:["A","B"]}], goal:0, start:[1,1]},
+
+{title:"El inversor estorba", task:"Enciende la salida.", hint:"A pasa por un inversor antes de llegar a la AND. Lo que la AND ve en esa pata es lo contrario de A.",
+ inputs:["A","B"], gates:[{id:"g1",type:"NOT",ins:["A"]},{id:"S",type:"AND",ins:["g1","B"]}], goal:1},
+
+{title:"Un solo interruptor", task:"Enciende la salida sin subir más de un interruptor.", hint:"La rama de la AND necesita dos entradas arriba, así que con un solo permiso queda descartada. Queda un único camino.",
+ inputs:["A","B","C"], gates:[{id:"g1",type:"AND",ins:["A","B"]},{id:"S",type:"OR",ins:["g1","C"]}], goal:1, maxOnes:1},
+
+{title:"Distintos y en reposo", task:"Enciende la salida.", hint:"La XOR pide que A y B sean diferentes. La otra pata de la AND viene invertida desde C.",
+ inputs:["A","B","C"], gates:[{id:"g1",type:"XOR",ins:["A","B"]},{id:"g2",type:"NOT",ins:["C"]},{id:"S",type:"AND",ins:["g1","g2"]}], goal:1},
+
+{title:"Exactamente dos", task:"Enciende la salida con exactamente dos interruptores arriba.", hint:"Trabaja hacia atrás desde la salida: la XOR final necesita que D y la rama AND sean distintos.",
+ inputs:["A","B","C","D"], gates:[
+   {id:"g1",type:"XOR",ins:["A","B"]},{id:"g2",type:"NAND",ins:["C","D"]},
+   {id:"g3",type:"AND",ins:["g1","g2"]},{id:"S",type:"XOR",ins:["g3","D"]}], goal:1, exactOnes:2},
+
+{title:"Entradas que no importan", task:"Deja la salida en 0.", hint:"La AND final recibe dos veces la misma señal g1. Si g1 vale 0, nada de lo que hagas con C y D cambia el resultado.",
+ inputs:["A","B","C","D"], gates:[
+   {id:"g1",type:"NAND",ins:["A","B"]},{id:"g2",type:"XOR",ins:["C","D"]},
+   {id:"g3",type:"OR",ins:["g1","g2"]},{id:"S",type:"AND",ins:["g3","g1"]}], goal:0},
+
+{title:"Presupuesto ajustado", task:"Enciende la salida sin subir más de dos interruptores.", hint:"La AND final exige C arriba. Con eso ya gastaste un permiso: te queda uno solo para el resto.",
+ inputs:["A","B","C","D"], gates:[
+   {id:"g1",type:"NOR",ins:["A","B"]},{id:"g2",type:"AND",ins:["B","C"]},
+   {id:"g3",type:"XOR",ins:["g2","D"]},{id:"g4",type:"OR",ins:["g1","g3"]},
+   {id:"S",type:"AND",ins:["g4","C"]}], goal:1, maxOnes:2},
+
+{title:"Silencio total", task:"Deja la salida en 0. Hay una sola combinación que lo logra.", hint:"La OR final solo cae si sus dos ramas caen. Cada NAND se apaga únicamente con sus dos entradas arriba; la XNOR se apaga cuando B y E son distintos.",
+ inputs:["A","B","C","D","E"], gates:[
+   {id:"g1",type:"NAND",ins:["A","B"]},{id:"g2",type:"NAND",ins:["C","D"]},
+   {id:"g3",type:"XNOR",ins:["B","E"]},{id:"g4",type:"OR",ins:["g1","g2"]},
+   {id:"S",type:"OR",ins:["g4","g3"]}], goal:0},
+
+{title:"Aguja en el pajar", task:"Enciende la salida. De las 32 combinaciones posibles, solo una funciona.", hint:"La AND final necesita g3 y g5 en 1. Y g5 es una NOR: solo vale 1 si g1 y g4 están ambas en 0. Empieza por ahí.",
+ inputs:["A","B","C","D","E"], gates:[
+   {id:"g1",type:"NAND",ins:["B","A"]},{id:"g2",type:"OR",ins:["C","E"]},
+   {id:"g3",type:"AND",ins:["B","A"]},{id:"g4",type:"OR",ins:["g2","D"]},
+   {id:"g5",type:"NOR",ins:["g1","g4"]},{id:"S",type:"AND",ins:["g3","g5"]}], goal:1}
+];
+
+/* ============ niveles — juego B ============ */
+const LB = [
+{title:"Solo si son distintos", task:"S enciende únicamente cuando A y B tienen valores diferentes.",
+ hint:"Esa es la definición literal del o exclusivo.",
+ inputs:["A","B"], slots:[{id:"S",ins:["A","B"]}]},
+
+{title:"Solo si son iguales", task:"S enciende únicamente cuando A y B tienen el mismo valor.",
+ hint:"Es el espejo del nivel anterior: la versión negada.",
+ inputs:["A","B"], slots:[{id:"S",ins:["A","B"]}]},
+
+{title:"Todo en reposo", task:"S enciende únicamente cuando A y B están ambas abajo.",
+ hint:"Detecta «alguna arriba» con la primera compuerta y luego dale la vuelta.",
+ inputs:["A","B"], slots:[{id:"s1",ins:["A","B"]},{id:"S",ins:["s1"]}]},
+
+{title:"Una sí, la otra no", task:"S enciende únicamente cuando A está arriba y B está abajo.",
+ hint:"Invierte B antes de combinarla con A. Así la segunda compuerta ve dos unos.",
+ inputs:["A","B"], slots:[{id:"s1",ins:["B"]},{id:"S",ins:["A","s1"]}]},
+
+{title:"El indulto de C", task:"S se apaga únicamente cuando A y B son iguales y además C está abajo.",
+ hint:"Que A y B sean distintos ya enciende S; C arriba también. Se suman dos condiciones.",
+ inputs:["A","B","C"], slots:[{id:"s1",ins:["A","B"]},{id:"S",ins:["s1","C"]}]},
+
+{title:"Dos parejas", task:"S enciende cuando A y B no están ambas arriba y, al mismo tiempo, C y D tienen valores distintos.",
+ hint:"Cada pareja se resuelve por separado y la tercera compuerta exige que ambas condiciones se cumplan a la vez.",
+ inputs:["A","B","C","D"], slots:[{id:"s1",ins:["A","B"]},{id:"s2",ins:["C","D"]},{id:"S",ins:["s1","s2"]}]},
+
+{title:"B trabaja doble", task:"S enciende cuando A y B son distintos, salvo que B y C estén ambas arriba.",
+ hint:"B alimenta las dos compuertas de la izquierda. La palabra «salvo» pide una negación en la segunda rama.",
+ inputs:["A","B","C"], slots:[{id:"s1",ins:["A","B"]},{id:"s2",ins:["B","C"]},{id:"S",ins:["s1","s2"]}]},
+
+{title:"Ida y vuelta", task:"S enciende cuando «A o B» y C tienen valores distintos.",
+ hint:"Necesitas «A o B» al entrar a la última compuerta, pero el camino pasa por un hueco intermedio de una sola entrada. Hay más de una forma de llegar.",
+ inputs:["A","B","C"], slots:[{id:"s1",ins:["A","B"]},{id:"s2",ins:["s1"]},{id:"S",ins:["s2","C"]}]},
+
+{title:"Cadena de tres", task:"Reproduce exactamente la columna «Meta» de la tabla. Cuatro huecos, dieciséis filas que cuadrar.",
+ hint:"Solución de referencia: A y B distintos, combinado con «D diferente de que B y C no estén ambas arriba».",
+ inputs:["A","B","C","D"], slots:[{id:"s1",ins:["A","B"]},{id:"s2",ins:["B","C"]},{id:"s3",ins:["s2","D"]},{id:"S",ins:["s1","s3"]}]},
+
+{title:"El examen", task:"Cinco huecos y dieciséis filas. Reproduce la columna «Meta».",
+ hint:"Solución de referencia: S enciende si A está arriba, o bien si A y B son distintos mientras C y D son iguales.",
+ inputs:["A","B","C","D"], slots:[
+   {id:"s1",ins:["A","B"]},{id:"s2",ins:["C","D"]},{id:"s3",ins:["s1","s2"]},
+   {id:"s4",ins:["s3"]},{id:"S",ins:["s4","A"]}]}
+];
+// tablas objetivo (verificadas: cada una tiene al menos una solución alcanzable)
+const TARGETS = ["0110","1001","1000","0010","01111101","0110011001100000",
+  "00101100","01101010","0000100110100000","0000100111111111"];
+LB.forEach((lv,i)=> lv.target = TARGETS[i]);
+
+/* ============ evaluación ============ */
+function evalCircuit(inputs, gates, vals){
+  const v = {};
+  inputs.forEach((n,i)=> v[n] = !!vals[i]);
+  for(const g of gates){
+    if(!g.type){ v[g.id] = null; continue; }
+    const args = g.ins.map(id => v[id]);
+    v[g.id] = args.some(x=>x===null) ? null : !!F[g.type](...args);
+  }
+  return v;
+}
+
+function truthTable(inputs, gates){
+  const k = inputs.length;
+  let out = "";
+  for(let m=0;m<(1<<k);m++){
+    const v = evalCircuit(inputs, gates, maskToVals(m,k));
+    out += v.S===null ? "-" : (v.S?"1":"0");
+  }
+  return out;
+}
+
+// combinaciones de interruptores que resuelven un nivel del juego A
+function solveA(lv){
+  const k = lv.inputs.length, out = [];
+  for(let m=0;m<(1<<k);m++){
+    const ones = popcount(m);
+    if(lv.maxOnes!==undefined && ones > lv.maxOnes) continue;
+    if(lv.exactOnes!==undefined && ones !== lv.exactOnes) continue;
+    const v = evalCircuit(lv.inputs, lv.gates, maskToVals(m,k));
+    if((v.S?1:0) === lv.goal) out.push(m);
+  }
+  return out;
+}
+
+// asignaciones de compuertas que reproducen la meta de un nivel del juego B
+function solveB(lv, cap){
+  cap = cap || 400;
+  const k = lv.inputs.length, R = 1<<k, n = lv.slots.length;
+  const opts = lv.slots.map(s => s.ins.length===2 ? P2 : P1);
+  const rows = Array.from({length:R}, (_,m)=>maskToVals(m,k));
+  const idx = new Array(n).fill(0), sols = [];
+  for(;;){
+    const gates = lv.slots.map((s,i)=>({id:s.id, ins:s.ins, type:opts[i][idx[i]]}));
+    let ok = true;
+    for(let m=0;m<R;m++){
+      const v = evalCircuit(lv.inputs, gates, rows[m]);
+      if((v.S?"1":"0") !== lv.target[m]){ ok = false; break; }
+    }
+    if(ok){
+      sols.push(Object.fromEntries(gates.map(g=>[g.id,g.type])));
+      if(sols.length>=cap) break;
+    }
+    let j = n-1;
+    while(j>=0){ if(++idx[j] < opts[j].length) break; idx[j--] = 0; }
+    if(j<0) break;
+  }
+  return sols;
+}
+
+/* ============ generador del modo sin final ============ */
+// Arma una red en orden topológico donde toda entrada y toda compuerta
+// terminan alimentando a S.
+function genStructure(k, g, prefix, p1){
+  for(let attempt=0; attempt<300; attempt++){
+    const inputs = NAMES.slice(0,k), avail = inputs.slice();
+    let unused = new Set(inputs);
+    const gates = [];
+    let ok = true;
+    for(let i=0;i<g && ok;i++){
+      const id = i===g-1 ? "S" : prefix+(i+1);
+      const left = g - i - 1;
+      let ins = null;
+      const slack = (left+1) - (unused.size-1);   // compuertas que sobran para combinar
+      for(let t=0;t<40 && !ins;t++){
+        const arity = Math.random()<p1 ? 1 : 2;
+        const un = [...unused], cand = [];
+        // «ramificar»: si sobran compuertas, algunas leen directo de las entradas
+        // «combinar»: toma las señales sueltas más antiguas → árboles anchos, no cadenas
+        const branch = slack>1 && left>0 && (unused.size<=2 ? Math.random()<.85 : Math.random()<.3);
+        for(let j=0;j<arity;j++){
+          const s = branch ? pick(inputs)
+            : un.length ? un.splice(Math.random()<.75 ? 0 : rand(un.length),1)[0]
+            : pick(avail);
+          if(cand.includes(s)) break;
+          cand.push(s);
+        }
+        if(cand.length!==arity) continue;
+        if(arity===1){
+          const src = gates.find(x=>x.id===cand[0]);
+          if(src && src.ins.length===1) continue;       // nada de NOT seguido de NOT
+        }
+        const after = new Set(unused);
+        cand.forEach(c=>after.delete(c)); after.add(id);
+        if(after.size-1 > left) continue;               // ya no alcanzarían las compuertas
+        ins = cand; unused = after;
+      }
+      if(!ins) ok = false; else { gates.push({id, ins}); avail.push(id); }
+    }
+    if(ok && unused.size===1) return {inputs, gates};
+  }
+  return null;
+}
+
+function genA(round){
+  const k = Math.min(5, 2 + Math.floor((round-1)/3));
+  const total = 1<<k;
+  // fracción de combinaciones ganadoras a la que apuntamos: cada ronda más estrecha
+  const want = Math.max(1/total, .5*Math.pow(.8, round-1));
+  const pool = round<=2 ? ["AND","OR"] : round<=4 ? ["AND","OR","NAND","NOR"] : P2;
+  let best = null, bestScore = Infinity;
+
+  for(let t=0;t<50;t++){
+    const g = Math.max(k-1, Math.min(7, k-1 + Math.floor((round-1)/4) + rand(2)));
+    const st = genStructure(k, g, "g", round<=2 ? .12 : .22);
+    if(!st) continue;
+    st.gates.forEach(x => x.type = x.ins.length===1 ? "NOT" : pick(pool));
+    const lv = {inputs:st.inputs, gates:st.gates, goal:rand(2)};
+
+    if(round>=4 && Math.random()<.4){
+      const pcs = solveA(lv).map(popcount);
+      if(pcs.length>1){
+        if(Math.random()<.5){
+          const m = Math.min(...pcs);
+          if(m>=1 && pcs.some(p=>p>m)) lv.maxOnes = m;
+        } else {
+          const p = pick(pcs);
+          if(p>=1 && pcs.some(q=>q!==p)) lv.exactOnes = p;
+        }
+      }
+    }
+
+    const sols = solveA(lv);
+    if(!sols.length || sols.length===total) continue;
+    const score = Math.abs(Math.log((sols.length/total)/want));
+    if(score < bestScore){ bestScore = score; best = lv; }
+  }
+  if(!best) return genA(Math.max(1, round-1));
+
+  const sols = new Set(solveA(best));
+  let start = 0;
+  if(sols.has(0)){
+    const free = [];
+    for(let m=0;m<total;m++) if(!sols.has(m)) free.push(m);
+    start = pick(free);
+  }
+  best.start = maskToVals(start, k);
+
+  let task = best.goal ? "Enciende la salida" : "Deja la salida en 0";
+  if(best.maxOnes!==undefined) task += ` sin subir más de ${plural(best.maxOnes,"interruptor","interruptores")}`;
+  if(best.exactOnes!==undefined) task += ` con exactamente ${plural(best.exactOnes,"interruptor","interruptores")} arriba`;
+  best.task = task + ".";
+  best.round = round;
+  best.base = 10*(k + best.gates.length) + (best.maxOnes!==undefined || best.exactOnes!==undefined ? 15 : 0);
+  return best;
+}
+
+function allInputsMatter(tt, k){
+  for(let i=0;i<k;i++){
+    const bit = 1<<i;
+    let matters = false;
+    for(let m=0;m<(1<<k) && !matters;m++) if(tt[m]!==tt[m^bit]) matters = true;
+    if(!matters) return false;
+  }
+  return true;
+}
+
+function genB(round){
+  const k = Math.min(4, 2 + Math.floor((round-1)/3));
+  const cap = round>=10 ? 6 : 5;
+  for(let t=0;t<120;t++){
+    const n = Math.max(k-1, Math.min(cap, k-1 + Math.floor((round-1)/3) + rand(2)));
+    const st = genStructure(k, n, "s", .2);
+    if(!st) continue;
+    const pool = round<=2 ? ["AND","OR","XOR","NAND"] : P2;
+    const gates = st.gates.map(x => ({...x, type: x.ins.length===1 ? (Math.random()<.8?"NOT":"BUF") : pick(pool)}));
+    const tt = truthTable(st.inputs, gates);
+    if(!tt.includes("0") || !tt.includes("1") || !allInputsMatter(tt, k)) continue;
+    return {
+      inputs: st.inputs, slots: st.gates.map(({id,ins})=>({id,ins})), target: tt,
+      task: "Elige una compuerta para cada hueco hasta reproducir la columna «Meta».",
+      round, base: 12*n + 2*(1<<k)
+    };
+  }
+  return genB(Math.max(1, round-1));
+}
+
+/* ============ trazado del circuito ============ */
+const COLW = 132, ROWH = 76;
+
+function layout(inputs, gates){
+  const depth = {}, node = {};
+  inputs.forEach(n => { depth[n]=0; node[n]={id:n,kind:"in"}; });
+  gates.forEach(g => { depth[g.id] = 1 + Math.max(...g.ins.map(i=>depth[i])); node[g.id]={...g,kind:"gate"}; });
+  const maxD = Math.max(...Object.values(depth));
+  const cols = [];
+  for(let d=0; d<=maxD; d++) cols[d] = Object.keys(depth).filter(k=>depth[k]===d);
+  const maxRows = Math.max(...cols.map(c=>c.length));
+  const H = Math.max(maxRows*ROWH + 30, 160);
+  cols.forEach((col,d)=>{
+    // ordena cada columna por la altura media de sus fuentes: menos cruces de cables
+    if(d>0){
+      const avg = id => node[id].ins.reduce((s,i)=>s+node[i].y,0) / node[id].ins.length;
+      col.sort((p,q)=> avg(p)-avg(q));
+    }
+    const span = col.length*ROWH;
+    col.forEach((id,i)=>{
+      node[id].x = 70 + d*COLW;
+      node[id].y = (H - span)/2 + ROWH/2 + i*ROWH;
+    });
+  });
+  const outX = node.S.x + (NEG[node.S.type]?38:26);
+  return {node, W: outX + 96, H};
+}
+
+function outPort(n){
+  if(n.kind==="in") return [n.x+32, n.y];
+  return [n.x + (n.type && NEG[n.type] ? 38 : 26), n.y];
+}
+function inPorts(n){
+  if(n.ins.length===1) return [[n.x-24, n.y]];
+  return [[n.x-24, n.y-11],[n.x-24, n.y+11]];
+}
+
+function glyph(type, x, y){
+  if(!type) return `<rect class="empty" x="${x-26}" y="${y-22}" width="${52}" height="44" rx="8"/>
+                    <text class="qmark" x="${x}" y="${y+7}">?</text>`;
+  const neg = !!NEG[type];
+  let body="", extra="", nose=x+26;
+  if(type==="AND"||type==="NAND"){
+    body = `M${x-26},${y-20} H${x+6} A20,20 0 0 1 ${x+6},${y+20} H${x-26} Z`;
+  } else if(type==="OR"||type==="NOR"){
+    body = `M${x-26},${y-20} C${x-8},${y-20} ${x+8},${y-12} ${x+26},${y} C${x+8},${y+12} ${x-8},${y+20} ${x-26},${y+20} C${x-16},${y+6} ${x-16},${y-6} ${x-26},${y-20} Z`;
+  } else if(type==="XOR"||type==="XNOR"){
+    body = `M${x-20},${y-20} C${x-2},${y-20} ${x+10},${y-12} ${x+26},${y} C${x+10},${y+12} ${x-2},${y+20} ${x-20},${y+20} C${x-10},${y+6} ${x-10},${y-6} ${x-20},${y-20} Z`;
+    extra = `<path class="gmark" d="M${x-30},${y-20} C${x-20},${y-6} ${x-20},${y+6} ${x-30},${y+20}"/>`;
+  } else { // NOT / BUF
+    body = `M${x-18},${y-18} L${x+14},${y} L${x-18},${y+18} Z`;
+    nose = x+14;
+  }
+  const bub = neg ? `<circle class="bub" cx="${nose+6}" cy="${y}" r="6"/>` : "";
+  const lab = `<text class="glabel" x="${x-2}" y="${y+36}">${type}</text>`;
+  return extra + `<path class="gbody" d="${body}"/>` + bub + lab;
+}
+
+function wire(p1, p2, hot){
+  const [x1,y1]=p1,[x2,y2]=p2;
+  return `<path class="w ${hot?"hot":""}" d="M${x1},${y1} C${x1+38},${y1} ${x2-38},${y2} ${x2},${y2}"/>`;
+}
+
+function renderCircuit(inputs, gates, vals, opts){
+  opts = opts || {};
+  const {node, W, H} = layout(inputs, gates);
+  const v = evalCircuit(inputs, gates, vals);
+  let wires = "", bodies = "";
+
+  gates.forEach(g => {
+    const n = node[g.id], ports = inPorts(n);
+    g.ins.forEach((src,i) => {
+      wires += wire(outPort(node[src]), ports[i], v[src]===true);
+    });
+  });
+
+  inputs.forEach((name,i) => {
+    const n = node[name], on = vals[i]?1:0;
+    const tip = opts.tip===name ? " tip" : "";
+    bodies += `<g class="inode${tip}" data-in="${name}" data-on="${on}" tabindex="0" role="button"
+                 aria-label="Interruptor ${name}, valor ${on}">
+      <rect class="ipill" x="${n.x-32}" y="${n.y-17}" width="64" height="34" rx="17"/>
+      <text class="iname" x="${n.x-18}" y="${n.y+5}">${name}</text>
+      <text class="ival" x="${n.x+12}" y="${n.y+5}">${on}</text>
+    </g>`;
+  });
+
+  gates.forEach(g => {
+    const n = node[g.id];
+    const isSlot = opts.slots && opts.slots.includes(g.id);
+    const cls = (opts.selected===g.id ? " sel" : "") + (opts.revealed && opts.revealed.has(g.id) ? " revealed" : "");
+    const inner = glyph(g.type, n.x, n.y);
+    bodies += isSlot
+      ? `<g class="slot${cls}" data-slot="${g.id}" tabindex="0" role="button"
+           aria-label="Hueco ${g.id}${g.type?", contiene "+g.type:", vacío"}">${inner}</g>`
+      : `<g>${inner}</g>`;
+  });
+
+  const s = node.S, [ox,oy] = outPort(s), on = v.S===true;
+  wires += wire([ox,oy],[ox+44,oy], on);
+  bodies += `<circle class="olamp ${on?"on":""}" cx="${ox+62}" cy="${oy}" r="17"/>
+             <circle class="ofil ${on?"on":""}" cx="${ox+62}" cy="${oy}" r="6"/>
+             <text class="pinlabel" x="${ox+54}" y="${oy+38}">S</text>`;
+
+  // se encoge para caber en pantallas angostas, pero no tanto que no se pueda tocar
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:${W}px;max-width:100%;min-width:${Math.min(W,500)}px" role="img" aria-label="Circuito lógico">
+            ${wires}${bodies}</svg>`;
+}
+
+/* ============ guardado ============ */
+const STORE = "taller-compuertas-v2";
+const save = {stars:{A:{},B:{}}, best:{A:0,B:0}, last:{mode:"A", play:"levels"}};
+try{
+  const d = JSON.parse(localStorage.getItem(STORE) || "null");
+  if(d){
+    Object.assign(save.stars.A, d.stars && d.stars.A);
+    Object.assign(save.stars.B, d.stars && d.stars.B);
+    Object.assign(save.best, d.best);
+    Object.assign(save.last, d.last);
+  }
+}catch(e){}
+function persist(){ try{ localStorage.setItem(STORE, JSON.stringify(save)); }catch(e){} }
+
+/* ============ estado ============ */
+const $ = id => document.getElementById(id);
+const S = {
+  mode:"A", play:"levels", idx:0, lv:null,
+  vals:[], moves:0, opt:0, sols:[],
+  assign:{}, selected:null, changes:0, solsB:null, revealed:new Set(), revealGate:{},
+  hints:0, tip:null, note:null,
+  won:false, justWon:false, winMsg:"",
+  run:{A:{round:1,score:0,streak:0}, B:{round:1,score:0,streak:0}}
+};
+const endless = () => S.play==="endless";
+const levelList = () => S.mode==="A" ? LA : LB;
+
+function startPuzzle(lv, keepHints){
+  S.lv = lv; S.moves = 0; S.changes = 0; S.selected = null;
+  S.won = false; S.justWon = false; S.tip = null; S.note = null;
+  if(!keepHints){ S.hints = 0; S.revealed = new Set(); }
+  if(S.mode==="A"){
+    S.vals = lv.start ? lv.start.slice() : new Array(lv.inputs.length).fill(0);
+    S.sols = solveA(lv);
+    const from = valsToMask(S.vals);
+    S.opt = Math.min(...S.sols.map(m=>popcount(m^from)));
+  } else {
+    S.vals = new Array(lv.inputs.length).fill(0);
+    S.assign = {};
+    lv.slots.forEach(s => S.assign[s.id] = null);
+    if(keepHints) S.revealed.forEach(id => S.assign[id] = S.revealGate[id]);
+    else { S.revealGate = {}; S.solsB = null; }
+  }
+  render();
+}
+
+function loadLevel(i){ S.idx = i; startPuzzle(levelList()[i]); }
+function loadEndless(){
+  const run = S.run[S.mode];
+  startPuzzle(S.mode==="A" ? genA(run.round) : genB(run.round));
+}
+function firstUnsolved(){
+  const list = levelList(), st = save.stars[S.mode];
+  const i = list.findIndex((_,j)=>!st[j]);
+  return i<0 ? 0 : i;
+}
+
+function gatesNow(){
+  const lv = S.lv;
+  return S.mode==="A" ? lv.gates : lv.slots.map(s=>({id:s.id, ins:s.ins, type:S.assign[s.id]||null}));
+}
+
+/* ============ comprobación ============ */
+function checkA(){
+  const lv = S.lv;
+  const ones = S.vals.reduce((a,b)=>a+b,0);
+  if(lv.maxOnes!==undefined && ones > lv.maxOnes)
+    return {state:"violation", text:`Llevas <b>${ones}</b> interruptores arriba y el límite es ${lv.maxOnes}. Baja alguno.`};
+  if(lv.exactOnes!==undefined && ones !== lv.exactOnes){
+    const v = evalCircuit(lv.inputs, lv.gates, S.vals);
+    const lit = (v.S?1:0)===lv.goal ? " La salida ya está como la quieres, pero así no cuenta." : "";
+    return {state:"violation", text:`Necesitas exactamente <b>${lv.exactOnes}</b> arriba y llevas ${ones}.${lit}`};
+  }
+  const v = evalCircuit(lv.inputs, lv.gates, S.vals);
+  const s = v.S?1:0;
+  if(s === lv.goal) return {state:"win"};
+  return {state:"live", text:`La salida vale <b>${s}</b> y la necesitas en ${lv.goal}.`};
+}
+
+function checkB(){
+  const lv = S.lv;
+  const mine = truthTable(lv.inputs, gatesNow());
+  const rows = mine.split("");
+  const empty = lv.slots.filter(s=>!S.assign[s.id]).length;
+  if(empty) return {state:"live", text:`Faltan <b>${empty}</b> ${empty===1?"hueco por llenar":"huecos por llenar"}.`, rows};
+  if(mine === lv.target) return {state:"win", rows};
+  const bad = rows.filter((c,i)=>c!==lv.target[i]).length;
+  return {state:"live", text:`Casi: <b>${bad}</b> ${bad===1?"fila no coincide":"filas no coinciden"} con la meta.`, rows};
+}
+
+function onWin(){
+  const lv = S.lv;
+  let stars, text;
+  if(S.mode==="A"){
+    const extra = S.moves - S.opt;
+    stars = extra<=0 ? 3 : extra<=2 ? 2 : 1;
+    text = `Resuelto en <b>${plural(S.moves,"movimiento","movimientos")}</b>` +
+           (S.moves>S.opt ? `; se podía en ${S.opt}.` : `, el mínimo posible.`);
+  } else {
+    const n = lv.slots.length;
+    stars = S.changes<=n ? 3 : S.changes<=2*n ? 2 : 1;
+    text = `Tu circuito reproduce la tabla completa` +
+           (S.changes>n ? ` tras ${plural(S.changes,"cambio","cambios")}.` : ` a la primera.`);
+  }
+  if(S.hints>=2) stars = 1; else if(S.hints===1) stars = Math.min(stars, 2);
+
+  let lead = "Nivel superado.";
+  if(!endless()){
+    const st = save.stars[S.mode];
+    if(stars > (st[S.idx]||0)) st[S.idx] = stars;
+  } else {
+    const run = S.run[S.mode];
+    run.streak++;
+    const gain = Math.round(lv.base*(1+(stars-1)/2)) + 5*(run.streak-1);
+    run.score += gain; run.round++;
+    lead = "Ronda superada.";
+    text += ` <b>+${gain}</b> puntos` + (run.streak>1 ? ` (racha de ${run.streak}).` : ".");
+    if(run.score > save.best[S.mode]){
+      const first = save.best[S.mode]===0;
+      save.best[S.mode] = run.score;
+      if(!first) text += " Nuevo récord.";
+    }
+  }
+  persist();
+  S.selected = null; S.tip = null; S.note = null;
+  S.winMsg = `${lead} ${text} <span class="stars" aria-label="${stars} de 3 estrellas">${"★".repeat(stars)}${"☆".repeat(3-stars)}</span>`;
+}
+
+/* ============ pistas ============ */
+function showHint(){
+  if(S.won) return;
+  const lv = S.lv;
+  S.hints++;
+  if(S.hints===1){
+    if(lv.hint) S.note = "<b>Pista.</b> " + lv.hint;
+    else if(S.mode==="A"){
+      const n = S.sols.length;
+      S.note = `<b>Pista.</b> Hay ${plural(n,"combinación que funciona","combinaciones que funcionan")} de ${1<<lv.inputs.length}. ` +
+               `Recorre el circuito desde S hacia atrás: ¿qué necesita recibir la última compuerta?`;
+    } else {
+      const ones = [...lv.target].filter(c=>c==="1").length;
+      S.note = `<b>Pista.</b> La meta vale 1 en ${ones} de ${lv.target.length} filas. ` +
+               `Mira qué entradas cambian la salida cuando todo lo demás se queda quieto.`;
+    }
+    render(); return;
+  }
+
+  if(S.mode==="A"){
+    const cur = valsToMask(S.vals), k = lv.inputs.length;
+    let best = S.sols[0], bd = Infinity;
+    S.sols.forEach(m => { const d = popcount(m^cur); if(d<bd){ bd=d; best=m; } });
+    const diff = best ^ cur;
+    const i = [...Array(k).keys()].find(i => (diff>>(k-1-i))&1);
+    S.tip = lv.inputs[i];
+    S.note = `<b>Pista.</b> Cambia <b>${S.tip}</b>. Te quedarán ${plural(bd-1,"movimiento","movimientos")} para la solución más cercana.`;
+  } else {
+    if(!S.solsB) S.solsB = solveB(lv);
+    let best = S.solsB[0], ba = -1;
+    S.solsB.forEach(sol => {
+      const ag = lv.slots.filter(s=>S.assign[s.id]===sol[s.id]).length;
+      if(ag>ba){ ba=ag; best=sol; }
+    });
+    const wrong = lv.slots.filter(s => S.assign[s.id]!==best[s.id]);
+    const slot = wrong.find(s=>!S.assign[s.id]) || wrong[0];
+    S.assign[slot.id] = best[slot.id];
+    S.revealed.add(slot.id); S.revealGate[slot.id] = best[slot.id];
+    S.selected = null;
+    S.note = `<b>Pista.</b> El hueco <b>${slot.id}</b> lleva <b>${best[slot.id]}</b>.`;
+  }
+  render();
+}
+
+/* ============ tabla juego B ============ */
+function buildTable(rows){
+  const lv = S.lv, k = lv.inputs.length;
+  const probe = valsToMask(S.vals);
+  let head = "<thead><tr>" + lv.inputs.map(n=>`<th>${n}</th>`).join("")
+           + "<th>Meta</th><th>Tuyo</th></tr></thead><tbody>";
+  let body = "";
+  for(let m=0;m<(1<<k);m++){
+    const bits = maskToVals(m,k);
+    const t = lv.target[m], mine = rows[m];
+    const cls = mine==="-" ? "" : (mine===t ? "ok" : "no");
+    body += `<tr data-m="${m}" class="${cls}${m===probe?" probe":""}">`
+          + bits.map(b=>`<td>${b}</td>`).join("")
+          + `<td class="meta">${t}</td><td class="mine">${mine}</td></tr>`;
+  }
+  return head + body + "</tbody>";
+}
+
+function paletteFor(slotId){
+  const s = S.lv.slots.find(x=>x.id===slotId);
+  return s.ins.length===2 ? P2 : P1;
+}
+
+/* ============ render ============ */
+function render(){
+  const lv = S.lv, list = levelList();
+
+  const res = S.mode==="A" ? checkA() : checkB();
+  if(res.state==="win" && !S.won){ S.won = true; S.justWon = true; onWin(); }
+
+  // barra superior
+  if(endless()){
+    const run = S.run[S.mode];
+    $("rail").innerHTML = `<div class="stats">
+      <div class="stat"><span>Ronda</span><b>${lv.round}</b></div>
+      <div class="stat hot"><span>Puntos</span><b>${run.score}</b></div>
+      <div class="stat"><span>Racha</span><b>${run.streak}</b></div>
+      <div class="stat"><span>Récord</span><b>${save.best[S.mode]}</b></div>
+      <button class="linkbtn" data-newrun="1">Nueva partida</button></div>`;
+  } else {
+    const st = save.stars[S.mode];
+    const total = Object.values(st).reduce((a,b)=>a+b,0);
+    $("rail").innerHTML = list.map((_,i)=>
+      `<button data-lv="${i}" aria-current="${i===S.idx}" class="${st[i]?"done":""}"
+         aria-label="Nivel ${i+1}${st[i]?`, ${st[i]} estrellas`:""}">${i+1}</button>`).join("")
+      + `<span class="railsum"><b>★</b> ${total} / ${list.length*3}</span>`;
+  }
+
+  $("lvTitle").textContent = endless() ? `Ronda ${lv.round}` : `${S.idx+1}. ${lv.title}`;
+  $("lvTask").textContent = lv.task;
+
+  const chips = [];
+  if(S.mode==="A"){
+    chips.push(`<span class="chip aim">Objetivo: S = ${lv.goal}</span>`);
+    if(lv.maxOnes!==undefined) chips.push(`<span class="chip">Máximo ${lv.maxOnes} arriba</span>`);
+    if(lv.exactOnes!==undefined) chips.push(`<span class="chip">Exactamente ${lv.exactOnes} arriba</span>`);
+    chips.push(`<span class="chip">${lv.inputs.length} entradas · ${lv.gates.length} ${lv.gates.length===1?"compuerta":"compuertas"}</span>`);
+  } else {
+    chips.push(`<span class="chip aim">Iguala la columna Meta</span>`);
+    chips.push(`<span class="chip">${lv.slots.length} ${lv.slots.length===1?"hueco":"huecos"} · ${1<<lv.inputs.length} filas</span>`);
+  }
+  if(endless()) chips.push(`<span class="chip">Vale ${lv.base} pts</span>`);
+  $("lvChips").innerHTML = chips.join("");
+
+  // circuito
+  const act = document.activeElement;
+  const keep = act && act.dataset && (act.dataset.in ? {k:"in", v:act.dataset.in}
+                     : act.dataset.slot ? {k:"slot", v:act.dataset.slot} : null);
+  const stage = $("stage");
+  stage.innerHTML = renderCircuit(lv.inputs, gatesNow(), S.vals, {
+    slots: S.mode==="B" ? lv.slots.map(s=>s.id) : null,
+    selected: S.selected, tip: S.tip, revealed: S.revealed
+  });
+  stage.classList.toggle("won", S.won);
+  stage.classList.toggle("locked", S.won);
+  stage.classList.toggle("pop", S.justWon);
+  S.justWon = false;
+  if(keep){
+    const el = stage.querySelector(keep.k==="in" ? `[data-in="${keep.v}"]` : `[data-slot="${keep.v}"]`);
+    if(el) el.focus();
+  }
+
+  // paleta y tabla
+  $("palette").hidden = S.mode!=="B";
+  $("tblbox").hidden = S.mode!=="B";
+
+  if(S.mode==="A"){
+    $("count").textContent = `Movimientos: ${S.moves} · mínimo ${S.opt}`;
+  } else {
+    $("tbl").innerHTML = buildTable(res.rows);
+    const sel = S.selected && !S.won ? S.selected : null;
+    const pal = sel ? paletteFor(sel) : P2;
+    $("palLab").textContent = S.won ? "Circuito completo. Puedes seguir probando filas en la tabla."
+      : sel ? `Hueco ${sel}: ${pal===P2?"dos entradas":"una entrada"}. Elige la compuerta.`
+      : "Toca un hueco del circuito para elegir su compuerta.";
+    $("palRow").innerHTML = pal.map((t,i) =>
+      `<button data-gate="${t}" ${sel?"":"disabled"} aria-pressed="${!!sel && S.assign[sel]===t}"><span class="kn">${i+1}</span>${t}</button>`).join("")
+      + (sel && S.assign[sel] ? `<button class="clear" data-clear="1">Vaciar</button>` : "");
+    const filled = lv.slots.filter(s=>S.assign[s.id]).length;
+    $("count").textContent = `Huecos: ${filled} de ${lv.slots.length} · cambios ${S.changes}`;
+  }
+
+  // mensaje
+  const m = $("msg");
+  if(S.won){ m.className = "msg win"; m.innerHTML = S.winMsg; }
+  else { m.className = "msg"; m.innerHTML = S.note || res.text; }
+
+  // botones
+  const next = $("btnNext");
+  next.hidden = !S.won;
+  next.textContent = endless() ? "Siguiente ronda"
+    : S.idx < list.length-1 ? "Siguiente nivel" : "Jugar sin final";
+  $("btnHint").hidden = S.won;
+  $("btnHint").textContent = S.hints===0 ? "Pista" : (S.mode==="A" ? "Otra pista" : "Revelar un hueco");
+  $("btnSkip").hidden = !endless() || S.won;
+  $("btnReset").hidden = endless() && S.won;
+
+  const keys = ["<kbd>A</kbd>–<kbd>" + lv.inputs[lv.inputs.length-1] + "</kbd> interruptores", "<kbd>P</kbd> pista", "<kbd>N</kbd> siguiente"];
+  if(S.mode==="B") keys.splice(1, 0, "<kbd>1</kbd>–<kbd>6</kbd> compuerta del hueco elegido", "<kbd>Supr</kbd> vaciar");
+  if(endless()) keys.push("<kbd>X</kbd> saltar");
+  $("keys").innerHTML = "Teclado: " + keys.join(" · ");
+}
+
+/* ============ acciones ============ */
+function toggleInput(i){
+  if(S.mode==="A" && S.won) return;
+  S.vals[i] ^= 1;
+  if(S.mode==="A"){ S.moves++; S.tip = null; S.note = null; }
+  render();
+}
+function setGate(t){
+  if(!S.selected || S.won) return;
+  if(S.assign[S.selected]!==t){ S.assign[S.selected] = t; S.changes++; }
+  S.revealed.delete(S.selected);
+  S.note = null;
+  const next = S.lv.slots.find(s => !S.assign[s.id]);
+  S.selected = next ? next.id : null;
+  render();
+}
+function clearSlot(){
+  if(!S.selected || S.won || !S.assign[S.selected]) return;
+  S.assign[S.selected] = null; S.revealed.delete(S.selected); S.note = null;
+  render();
+}
+function goNext(){
+  if(!S.won) return;
+  if(endless()) loadEndless();
+  else if(S.idx < levelList().length-1) loadLevel(S.idx+1);
+  else setPlay("endless");
+}
+function skip(){
+  if(!endless() || S.won) return;
+  S.run[S.mode].streak = 0;
+  loadEndless();
+}
+function newRun(){
+  S.run[S.mode] = {round:1, score:0, streak:0};
+  loadEndless();
+}
+
+/* ============ eventos ============ */
+$("stage").addEventListener("click", e => {
+  const inode = e.target.closest(".inode");
+  if(inode){ toggleInput(S.lv.inputs.indexOf(inode.dataset.in)); return; }
+  const slot = e.target.closest(".slot");
+  if(slot && !S.won){ S.selected = (S.selected===slot.dataset.slot) ? null : slot.dataset.slot; render(); }
+});
+$("stage").addEventListener("keydown", e => {
+  if(e.key!=="Enter" && e.key!==" ") return;
+  const t = e.target.closest(".inode, .slot");
+  if(!t) return;
+  e.preventDefault(); e.stopPropagation();
+  t.dispatchEvent(new MouseEvent("click",{bubbles:true}));
+});
+
+$("palRow").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b || b.disabled) return;
+  if(b.dataset.clear) clearSlot(); else setGate(b.dataset.gate);
+});
+
+$("tbl").addEventListener("click", e => {
+  const tr = e.target.closest("tr[data-m]"); if(!tr) return;
+  S.vals = maskToVals(+tr.dataset.m, S.lv.inputs.length);
+  render();
+});
+
+$("rail").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.newrun) newRun();
+  else if(b.dataset.lv!==undefined) loadLevel(+b.dataset.lv);
+});
+
+$("btnReset").addEventListener("click", ()=> startPuzzle(S.lv, true));
+$("btnNext").addEventListener("click", goNext);
+$("btnHint").addEventListener("click", showHint);
+$("btnSkip").addEventListener("click", skip);
+
+document.addEventListener("keydown", e => {
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  const key = e.key.toLowerCase();
+  const li = NAMES.findIndex(n => n.toLowerCase()===key);
+  if(li>=0 && li<S.lv.inputs.length){ e.preventDefault(); toggleInput(li); return; }
+  if(S.mode==="B" && S.selected && !S.won){
+    if(/^[1-6]$/.test(key)){
+      const t = paletteFor(S.selected)[+key-1];
+      if(t){ e.preventDefault(); setGate(t); }
+      return;
+    }
+    if(key==="backspace" || key==="delete"){ e.preventDefault(); clearSlot(); return; }
+  }
+  if(key==="n") goNext();
+  else if(key==="p") showHint();
+  else if(key==="x") skip();
+});
+
+function setMode(m){
+  S.mode = m;
+  $("tabA").setAttribute("aria-selected", m==="A");
+  $("tabB").setAttribute("aria-selected", m==="B");
+  save.last.mode = m; persist();
+  endless() ? loadEndless() : loadLevel(firstUnsolved());
+}
+function setPlay(p){
+  S.play = p;
+  $("playLevels").setAttribute("aria-pressed", p==="levels");
+  $("playEndless").setAttribute("aria-pressed", p==="endless");
+  save.last.play = p; persist();
+  endless() ? loadEndless() : loadLevel(firstUnsolved());
+}
+$("tabA").addEventListener("click", ()=> setMode("A"));
+$("tabB").addEventListener("click", ()=> setMode("B"));
+$("playLevels").addEventListener("click", ()=> setPlay("levels"));
+$("playEndless").addEventListener("click", ()=> setPlay("endless"));
+
+S.play = save.last.play==="endless" ? "endless" : "levels";
+$("playLevels").setAttribute("aria-pressed", S.play==="levels");
+$("playEndless").setAttribute("aria-pressed", S.play==="endless");
+setMode(save.last.mode==="B" ? "B" : "A");
+</script>
+</body>
+</html>

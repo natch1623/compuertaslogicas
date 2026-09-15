@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compuertas lógicas — aprende y juega</title>
+<meta name="description" content="Material interactivo de compuertas lógicas: siete compuertas explicadas con interruptores y dos juegos de circuitos con modo sin final.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23101A26'/><path d='M14 14h18a18 18 0 0 1 0 36H14z' fill='none' stroke='%23FFB020' stroke-width='5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#101A26; --panel:#17232F; --panel-2:#1E2C3A; --line:#2F4356;
+  --cold:#7E97AC; --paper:#E4EDF4; --hot:#FFB020; --glow:rgba(255,176,32,.28);
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--ink);color:var(--paper);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding:0 22px 80px}
+
+header{padding:84px 0 0}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:.84rem;color:var(--hot);letter-spacing:.08em;margin:0 0 18px}
+h1{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+  font-size:clamp(2.6rem,8vw,5rem);line-height:.96;letter-spacing:-.035em;
+  margin:0 0 22px;max-width:13ch;
+}
+.lede{color:var(--cold);font-size:1.14rem;max-width:54ch;margin:0}
+.lede b{color:var(--paper);font-weight:500}
+
+/* interruptor de la portada */
+.demo{
+  margin:44px 0 0;display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  padding:18px 22px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);
+}
+.demo button{
+  font-family:"IBM Plex Mono",monospace;font-size:1rem;font-weight:600;width:64px;height:40px;
+  border-radius:20px;border:1px solid var(--line);background:var(--panel-2);color:var(--cold);cursor:pointer;transition:.16s;
+}
+.demo button[aria-pressed="true"]{border-color:var(--hot);color:var(--hot);background:#26221A}
+.demo button:focus-visible{outline:2px solid var(--hot);outline-offset:3px}
+.demo svg{width:170px;height:auto;flex:none}
+.demo p{margin:0;color:var(--cold);font-size:.95rem;flex:1;min-width:200px}
+.demo p b{color:var(--paper);font-weight:500}
+.w{stroke:var(--line);stroke-width:3;fill:none;transition:stroke .16s}
+.w.hot{stroke:var(--hot)}
+.gbody{fill:var(--panel-2);stroke:var(--cold);stroke-width:3;stroke-linejoin:round}
+.lamp{fill:var(--panel-2);stroke:var(--line);stroke-width:3;transition:.2s}
+.lamp.on{fill:#2A2417;stroke:var(--hot);filter:drop-shadow(0 0 8px rgba(255,176,32,.6))}
+
+/* tarjetas */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:26px 0 0}
+.card{
+  display:flex;flex-direction:column;text-decoration:none;color:inherit;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  padding:26px 26px 24px;transition:border-color .16s,transform .16s;
+}
+.card:hover{border-color:var(--hot);transform:translateY(-2px)}
+.card:focus-visible{outline:2px solid var(--hot);outline-offset:3px}
+.card .tag{font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--cold);letter-spacing:.08em;text-transform:uppercase}
+.card h2{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:1.7rem;
+  letter-spacing:-.02em;line-height:1.1;margin:10px 0 10px;
+}
+.card p{margin:0 0 18px;color:var(--cold);font-size:.97rem}
+.card ul{list-style:none;padding:0;margin:0 0 22px;font-size:.92rem;color:var(--paper)}
+.card li{padding:7px 0;border-top:1px solid var(--line)}
+.card li:last-child{border-bottom:1px solid var(--line)}
+.card .go{margin-top:auto;font-weight:600;color:var(--hot)}
+.card .go::after{content:" →"}
+
+footer{border-top:1px solid var(--line);margin-top:70px;padding-top:26px;font-size:.88rem;color:var(--cold)}
+footer p{margin:0 0 6px;max-width:70ch}
+
+@media (max-width:720px){
+  body{font-size:16px}
+  .wrap{padding:0 16px 60px}
+  header{padding-top:56px}
+  .cards{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <p class="kicker">FUNDAMENTOS DE ELECTRÓNICA</p>
+  <h1>Compuertas lógicas</h1>
+  <p class="lede">Una compuerta no calcula: <b>decide si deja pasar la corriente</b>. Aquí puedes aprender las siete compuertas con interruptores y luego ponerlas a prueba armando y resolviendo circuitos.</p>
+</header>
+
+<div class="demo" aria-label="Demostración de una compuerta AND">
+  <button id="dA" aria-pressed="false" aria-label="Interruptor A">A 0</button>
+  <button id="dB" aria-pressed="false" aria-label="Interruptor B">B 0</button>
+  <svg viewBox="0 0 170 70" aria-hidden="true">
+    <path class="w" id="wA" d="M0,22 H44"/>
+    <path class="w" id="wB" d="M0,48 H44"/>
+    <path class="gbody" d="M44,8 H78 A27,27 0 0 1 78,62 H44 Z"/>
+    <path class="w" id="wS" d="M105,35 H136"/>
+    <circle class="lamp" id="lamp" cx="152" cy="35" r="13"/>
+  </svg>
+  <p>Esto es una <b>AND</b>: la lámpara solo enciende con los dos interruptores arriba. Pruébalo.</p>
+</div>
+
+<div class="cards">
+  <a class="card" href="compuertas-logicas.html">
+    <span class="tag">Aprende</span>
+    <h2>Siete maneras de decir «sí»</h2>
+    <p>Un banco de pruebas con AND, OR, NOT, NAND, NOR, XOR y XNOR, sus tablas de verdad y los circuitos de interruptores de donde salen.</p>
+    <ul>
+      <li>Símbolo, expresión y tabla de cada compuerta</li>
+      <li>Serie, paralelo y contacto normalmente cerrado</li>
+      <li>Reto: adivina la compuerta por su tabla</li>
+    </ul>
+    <span class="go">Abrir el banco de pruebas</span>
+  </a>
+
+  <a class="card" href="juego-compuertas.html">
+    <span class="tag">Juega</span>
+    <h2>Taller de compuertas</h2>
+    <p>Dos juegos: enciende la salida moviendo interruptores, o elige qué compuerta va en cada hueco para reproducir una tabla de verdad.</p>
+    <ul>
+      <li>Diez niveles por juego, con estrellas</li>
+      <li>Modo sin final: circuitos nuevos cada ronda</li>
+      <li>Puntos, rachas y récord guardados en tu navegador</li>
+    </ul>
+    <span class="go">Entrar al taller</span>
+  </a>
+</div>
+
+<footer>
+  <p>Material de apoyo — Fundamentos de Electrónica.</p>
+  <p>Basado en Shannon (1938), Mano y Ciletti (2013), Tocci et al. (2017) y Floyd (2015). Símbolos según IEEE Std 91-1984.</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const st = {a:0, b:0};
+const $ = id => document.getElementById(id);
+function paint(){
+  const s = st.a && st.b;
+  $("dA").textContent = "A " + st.a; $("dA").setAttribute("aria-pressed", !!st.a);
+  $("dB").textContent = "B " + st.b; $("dB").setAttribute("aria-pressed", !!st.b);
+  $("wA").classList.toggle("hot", !!st.a);
+  $("wB").classList.toggle("hot", !!st.b);
+  $("wS").classList.toggle("hot", !!s);
+  $("lamp").classList.toggle("on", !!s);
+}
+$("dA").addEventListener("click", ()=>{ st.a ^= 1; paint(); });
+$("dB").addEventListener("click", ()=>{ st.b ^= 1; paint(); });
+paint();
+</script>
+</body>
+</html>
