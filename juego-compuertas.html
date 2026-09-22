@@ -32,6 +32,9 @@ p{max-width:66ch}
 .sitenav a:hover{color:var(--paper);border-color:var(--cold)}
 .sitenav a[aria-current="page"]{color:var(--hot)}
 .sitenav .home{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;color:var(--paper);margin-right:auto}
+.sitenav .deck{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border:1px solid rgba(255,176,32,.4);border-radius:999px;color:var(--hot);box-shadow:0 0 16px -8px rgba(255,176,32,.9)}
+.sitenav .deck::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--hot);box-shadow:0 0 6px var(--hot)}
+.sitenav .deck:hover{color:var(--hot);border-color:var(--hot);background:rgba(255,176,32,.08)}
 
 header{padding:48px 0 0}
 h1{
@@ -227,6 +230,7 @@ footer h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size
   <a class="home" href="./">Compuertas lógicas</a>
   <a href="compuertas-logicas.html">Aprende las compuertas</a>
   <a href="juego-compuertas.html" aria-current="page">Taller de juegos</a>
+  <a class="deck" href="presentacion/">Presentación</a>
 </nav>
 
 <header>

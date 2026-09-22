@@ -1,0 +1,172 @@
+/* =====================================================================
+   v3 · «Tablero en vivo»
+   Esmalte antracita (RAL 7016), colores de señalización IEC 60073,
+   tipografía de señalética DIN (Barlow), rieles de potencia persistentes
+   y rótulos grabados. Se carga después de deck.css y lo sobrescribe.
+   ===================================================================== */
+:root{
+  color-scheme:dark;
+  --bg:#111518; --raise:#232B32; --panel:#171D22;
+  --line:rgba(205,218,228,.10); --line-2:rgba(205,218,228,.18); --wire:#3B464F;
+  --paper:#ECEFF1; --cold:#A0ACB6; --dim:#6E7B86;
+  --ok:#2FD08A; --bad:#F0464E;
+  --grid:rgba(205,218,228,.032);
+  --sans:"Barlow",system-ui,sans-serif;
+  --display:"Barlow Condensed","Barlow",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+html,body{overscroll-behavior:none}
+body{font-size:18px;-webkit-tap-highlight-color:transparent}
+button,a,.gin,.ct,[data-q]{touch-action:manipulation}
+h1,h2,h3{text-wrap:balance}
+p{text-wrap:pretty}
+.tt,.eq,.eq-row code,.tnow,.tlim,.read,.dock-num,.q-num,.range output,.big-read,.g-card code{font-variant-numeric:tabular-nums}
+
+/* rótulos: minúscula normal, sin mayúsculas espaciadas */
+.lbl{font:600 .8rem/1.25 var(--sans);letter-spacing:.005em;text-transform:none;color:var(--dim)}
+.kicker{font:600 .95rem var(--sans);letter-spacing:.005em;text-transform:none}
+.brand{font:600 .82rem var(--sans);letter-spacing:.01em;text-transform:none}
+.chip{height:30px;gap:9px;padding:0 13px 0 4px;font:600 .88rem/1 var(--sans);letter-spacing:.005em;text-transform:none;
+  background:color-mix(in oklab,var(--gc) 9%,#171D22);border-color:color-mix(in oklab,var(--gc) 38%,transparent)}
+.chip::before{display:none}
+.chip:not(:has(b)){padding-left:13px}
+.chip b{display:inline-grid;place-items:center;height:22px;min-width:28px;padding:0 6px;border-radius:999px;background:var(--gc);color:#111518;font:700 .76rem var(--mono)}
+.g-card small{font:500 .82rem var(--sans);letter-spacing:0;text-transform:none;color:var(--cold)}
+.hud-tl{font:600 .78rem var(--sans);letter-spacing:.01em;text-transform:none;color:var(--cold)}
+.status b{font:700 1.02rem var(--display);letter-spacing:.02em;text-transform:none}
+.status span{font-size:.92rem}
+.tabs button{height:34px;padding:0 14px;font:600 .84rem var(--sans);letter-spacing:0;text-transform:none}
+.seg button{height:32px;padding:0 12px;font:600 .8rem var(--sans);letter-spacing:0;text-transform:none}
+
+/* tipografía de exhibición: condensada, de señalética industrial */
+.mega{font:800 clamp(4rem,12vw,12.8rem)/1 var(--display);letter-spacing:-.012em;text-transform:uppercase;margin:.14em 0 .06em}
+.cover-sub{font:500 clamp(1.3rem,2.5vw,2.5rem)/1.1 var(--display);letter-spacing:.01em;color:var(--cold)}
+.g-name{font:800 clamp(3.6rem,8.6vw,8.8rem)/.78 var(--display);letter-spacing:-.005em}
+.g-story h3{font:700 clamp(1.35rem,2.2vw,2.3rem)/1.02 var(--display);letter-spacing:.005em}
+.g-story p{font-size:clamp(.95rem,1.12vw,1.12rem)}
+.edge{font:700 clamp(2.6rem,6.2vw,7rem)/.94 var(--display);letter-spacing:-.005em}
+.edge .hl .ch{color:inherit}
+.h-mid{font:700 clamp(2.4rem,5vw,5.3rem)/.94 var(--display);letter-spacing:-.005em}
+.part-title{font:800 clamp(3.6rem,8vw,8.6rem)/.9 var(--display);letter-spacing:-.008em;text-transform:uppercase;max-width:none}
+.part-num{font:800 clamp(14rem,34vw,36rem)/.8 var(--display);letter-spacing:-.02em}
+.part-item b{font:800 1.9rem/1 var(--display);letter-spacing:.01em}
+.part-item span{font-size:.95rem}
+.int-head h2{font:800 clamp(2.3rem,4.3vw,4.8rem)/.88 var(--display);letter-spacing:-.005em}
+.quiz-q{font:700 clamp(2.2rem,4.6vw,4.9rem)/.98 var(--display);letter-spacing:0}
+.closing{font:800 clamp(2.9rem,7.2vw,8rem)/.88 var(--display);letter-spacing:-.008em}
+.closing .hl .ch{color:inherit}
+.closing .hl::after{display:none}
+.trio .word{font:800 clamp(2.3rem,4vw,4.2rem)/1 var(--display);letter-spacing:.005em}
+.score b{font:800 clamp(3.6rem,7vw,6.6rem)/1 var(--display)}
+.ghost{font:800 clamp(12rem,29vw,31rem)/.8 var(--display);letter-spacing:-.015em;-webkit-text-stroke:1.5px color-mix(in oklab,var(--gc) 13%,transparent)}
+.opt{font:700 1.15rem var(--display);letter-spacing:.03em}
+.q-num{font:700 1.3rem var(--display);letter-spacing:.04em}
+
+/* fondo: esmalte neutro con retícula de montaje, sin lavados de color */
+.slide{background-image:
+    radial-gradient(75% 60% at 90% -12%,color-mix(in oklab,var(--gc) 8%,transparent),transparent 70%),
+    linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:auto,40px 40px,40px 40px;background-position:0 0,center,center}
+.slide::before{background:radial-gradient(125% 100% at 50% 38%,transparent 58%,rgba(0,0,0,.5))}
+.cover-glow{background:radial-gradient(circle,rgba(255,176,32,.10),transparent 62%)}
+
+/* paneles: chapa pintada con tornillos, no vidrio */
+.glass{background:linear-gradient(180deg,#1B2227,#161B1F);border:1px solid rgba(205,218,228,.085);border-radius:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),inset 0 -1px 0 rgba(0,0,0,.45),0 22px 44px -28px rgba(0,0,0,.95)}
+.corners::after{inset:6px;opacity:1;
+  --s:radial-gradient(circle at 42% 38%,#8C979F 0 1.1px,#4A545C 1.5px 2.6px,#1A2025 3px,transparent 3.4px);
+  background:var(--s) top left/8px 8px no-repeat,var(--s) top right/8px 8px no-repeat,var(--s) bottom left/8px 8px no-repeat,var(--s) bottom right/8px 8px no-repeat}
+.sw,.pb,.range{border-radius:11px;background:#161C21}
+.sw .key{border-radius:7px}
+.status{border-radius:10px;background:rgba(10,13,16,.82)}
+.scen button{background:rgba(12,16,19,.8);font-size:.8rem}
+.ex{background:#161C21;font-size:.92rem}
+.eqbox{background:#0F1316}
+.hud-tl i{width:6px;height:6px}
+
+/* materiales flotantes (dock, menús) con saturación */
+.dock,.notes,.tmenu,.tpill,.overview{-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%)}
+.dock{background:rgba(22,28,33,.74)}
+.tpill{background:rgba(22,28,33,.78)}
+.tcustom input{font-size:16px}
+
+/* rieles de potencia persistentes: L energizado y N */
+.rails{position:fixed;inset:0;pointer-events:none;z-index:24}
+.rails i{position:absolute;top:60px;bottom:88px;width:2px;border-radius:1px}
+.rails .rl{left:calc(var(--gut) / 2 - 1px);background:linear-gradient(transparent,rgba(255,176,32,.5) 10%,rgba(255,176,32,.5) 90%,transparent);box-shadow:0 0 12px rgba(255,176,32,.28)}
+.rails .rn{right:calc(var(--gut) / 2 - 1px);background:linear-gradient(transparent,rgba(205,218,228,.16) 10%,rgba(205,218,228,.16) 90%,transparent)}
+.rails b{position:absolute;bottom:96px;font:700 .72rem var(--mono);color:var(--dim)}
+.rails .tl{left:calc(var(--gut) / 2 + 6px);color:rgba(255,176,32,.75)}
+.rails .tn{right:calc(var(--gut) / 2 + 6px)}
+.rails .pulse{left:calc(var(--gut) / 2 - 3px);top:0;bottom:auto;width:6px;height:120px;border-radius:3px;
+  background:linear-gradient(transparent,#FFE0A0 45%,#FFB020 55%,transparent);opacity:0;box-shadow:0 0 18px 2px rgba(255,176,32,.55)}
+
+/* rótulos grabados dentro de las escenas */
+.scene .plate-t{fill:#0A0D10;stroke:#3B464F;stroke-width:.8}
+.scene text.lbl.on-plate{fill:#D3DBE1;letter-spacing:.12em}
+
+/* entradas: un solo gesto por diapositiva */
+[data-a]{transform:translate3d(0,12px,0);filter:none;transition:opacity .6s var(--ease-out),transform .8s var(--ease-out);transition-delay:calc(var(--i,0) * 60ms + 260ms)}
+[data-a="scale"]{transform:none;transition:none}
+.is-active [data-a="scale"]{animation:powerOn .7s linear both;animation-delay:calc(var(--i,0) * 80ms + 380ms)}
+.is-out [data-a="scale"]{animation:none;opacity:1}
+@keyframes powerOn{0%{opacity:0}22%{opacity:.75}32%{opacity:.3}58%,100%{opacity:1}}
+
+/* portada: el título se energiza letra por letra */
+.mega .w{overflow:visible}
+.w{white-space:nowrap}
+.mega .ch{color:transparent;-webkit-text-stroke:1.5px rgba(236,239,241,.24);transform:none;transition:none}
+.is-active .mega .ch{animation:energize 1.1s var(--ease-out) both;animation-delay:calc(var(--ci) * 55ms + 420ms)}
+.is-out .mega .ch{color:var(--paper);-webkit-text-stroke-color:transparent}
+@keyframes energize{
+  0%{color:transparent;-webkit-text-stroke-color:rgba(236,239,241,.24);text-shadow:none}
+  30%{color:#FFC862;-webkit-text-stroke-color:#FFB020;text-shadow:0 0 34px rgba(255,176,32,.75)}
+  100%{color:var(--paper);-webkit-text-stroke-color:transparent;text-shadow:0 0 0 transparent}}
+
+@media (max-width:900px),(max-height:600px){.rails{display:none}}
+@media (prefers-reduced-motion:reduce){
+  .is-active [data-a="scale"]{animation:none!important;opacity:1}
+  .mega .ch,.is-active .mega .ch{animation:none!important;color:var(--paper);-webkit-text-stroke:0}
+  .rails .pulse{display:none}
+}
+
+/* celular: la escena y su estado se apilan, sin superponerse */
+@media (max-width:560px){
+  .stage{display:flex;flex-direction:column;height:auto}
+  .scene-wrap{position:relative;inset:auto;height:66vw;margin:6px 8px 0}
+  .status{position:relative;left:auto;right:auto;bottom:auto;margin:8px;align-items:flex-start}
+  .logic-top .lbl{display:none}
+  .tabs button{padding:0 10px;font-size:.8rem}
+}
+
+/* panel de lógica en dos pestañas: tabla + compuertas · ladder + cronograma */
+.tabs .ind{width:calc((100% - 6px) / 2)}
+.tabs[data-tab="1"] .ind{transform:translateX(100%)}
+.tabs[data-tab="2"] .ind{transform:translateX(100%)}
+.gates-wrap{display:flex;flex-direction:column;gap:10px;min-height:0}
+.gates-wrap .eqbox{flex:none}
+.vc{display:flex;flex-direction:column;gap:clamp(8px,1.4vh,14px)}
+.vc .ladder-wrap{flex:1.15;min-height:0}
+.chrono-wrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+.chrono-slot{flex:1;min-height:0;display:flex;align-items:center}
+.chrono-slot .chrono{width:100%;height:100%}
+@media (max-width:1100px){
+  .gates-wrap{min-height:230px}
+  .chrono-wrap{min-height:150px}
+}
+
+/* diapositiva 0: pantalla negra de espera antes de comenzar */
+.s-blank{background:#000000;background-image:none;justify-content:flex-end;align-items:center}
+.s-blank::before{display:none}
+.blank-hint{margin:0 0 10px;font:500 .92rem var(--sans);color:#4D5962}
+.blank-hint kbd{border-color:#2A3138;color:#5E6B75;background:#0B0E11}
+/* el cromo se aparta mientras la pantalla está en blanco */
+html[data-slide="0"] .rails,html[data-slide="0"] .keys,html[data-slide="0"] .segs{opacity:0}
+html[data-slide="0"] .brand{color:#3C464E}
+html[data-slide="0"] .dock{background:rgba(9,13,17,.92)}
+html[data-slide="0"] .brand svg{opacity:.4}
+html[data-slide="0"] .clock{color:#3C464E}
+html[data-slide="0"] .tpill{background:rgba(9,13,17,.92)}
+/* el grano de película se nota sobre el negro puro: se apaga */
+html[data-slide="0"] body::after{opacity:0}
+.rails,.keys,.segs{transition:opacity .5s var(--ease-out)}

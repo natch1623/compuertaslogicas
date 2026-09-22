@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Compuertas lógicas — aprende y juega</title>
-<meta name="description" content="Material interactivo de compuertas lógicas: siete compuertas explicadas con interruptores y dos juegos de circuitos con modo sin final.">
+<meta name="description" content="Material interactivo de compuertas lógicas: siete compuertas explicadas con interruptores, dos juegos de circuitos y una presentación con máquinas electromecánicas simuladas en vivo.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23101A26'/><path d='M14 14h18a18 18 0 0 1 0 36H14z' fill='none' stroke='%23FFB020' stroke-width='5'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,6 +76,42 @@ h1{
 .card .go{margin-top:auto;font-weight:600;color:var(--hot)}
 .card .go::after{content:" →"}
 
+/* tarjeta destacada: la presentación en clase */
+.feature{
+  position:relative;overflow:hidden;isolation:isolate;
+  display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center;
+  margin:26px 0 0;padding:30px 30px 28px;border-radius:var(--r);text-decoration:none;color:inherit;
+  background:#07090C;border:1px solid rgba(255,176,32,.28);
+  box-shadow:inset 0 0 40px -24px rgba(255,176,32,.55),0 0 40px -26px rgba(255,176,32,.6);
+  transition:border-color .16s,transform .16s,box-shadow .2s;
+}
+.feature::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(rgba(205,218,228,.03) 1px,transparent 1px) 0 0/32px 32px,
+             linear-gradient(90deg,rgba(205,218,228,.03) 1px,transparent 1px) 0 0/32px 32px,
+             radial-gradient(70% 90% at 100% 0%,rgba(255,176,32,.13),transparent 70%)}
+.feature:hover{border-color:var(--hot);transform:translateY(-2px);
+  box-shadow:inset 0 0 44px -22px rgba(255,176,32,.7),0 0 56px -22px rgba(255,176,32,.75)}
+.feature:focus-visible{outline:2px solid var(--hot);outline-offset:3px}
+.feature .tag{font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--hot);letter-spacing:.08em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:8px}
+.feature .tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--hot);box-shadow:0 0 8px var(--hot),0 0 18px var(--hot)}
+.feature h2{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(1.9rem,4.4vw,2.7rem);
+  letter-spacing:-.03em;line-height:1;margin:12px 0 12px;color:#FFF6E2;
+  filter:drop-shadow(0 0 6px rgba(255,176,32,.55)) drop-shadow(0 0 22px rgba(255,176,32,.3));
+}
+.feature p{margin:0 0 20px;color:var(--cold);font-size:.99rem;max-width:46ch}
+.feature .go{font-weight:600;color:var(--hot)}
+.feature .go::after{content:"→";display:inline-block;margin-left:.3em;transition:transform .16s}
+.feature:hover .go::after{transform:translateX(4px)}
+.feature .url{display:block;margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:#5E7285}
+.gates{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.gates li{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:9px 12px;border:1px solid rgba(205,218,228,.09);border-radius:8px;background:rgba(18,23,27,.8);font-size:.84rem;color:var(--cold)}
+.gates b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.02rem;font-weight:800;letter-spacing:.02em;color:var(--c);
+  text-shadow:0 0 10px color-mix(in oklab,var(--c) 60%,transparent)}
+.gates li:last-child{grid-column:1/-1}
+
 footer{border-top:1px solid var(--line);margin-top:70px;padding-top:26px;font-size:.88rem;color:var(--cold)}
 footer p{margin:0 0 6px;max-width:70ch}
 
@@ -84,6 +120,7 @@ footer p{margin:0 0 6px;max-width:70ch}
   .wrap{padding:0 16px 60px}
   header{padding-top:56px}
   .cards{grid-template-columns:1fr}
+  .feature{grid-template-columns:1fr;padding:24px 20px 22px;gap:22px}
 }
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
 </style>
@@ -136,6 +173,25 @@ footer p{margin:0 0 6px;max-width:70ch}
     <span class="go">Entrar al taller</span>
   </a>
 </div>
+
+<a class="feature" href="presentacion/">
+  <div>
+    <span class="tag">Presenta en clase</span>
+    <h2>Compuertas en la industria</h2>
+    <p>Presentación interactiva: las siete compuertas controlando máquinas reales que se simulan en vivo, con tabla de verdad, diagrama de compuertas, Ladder, ecuación booleana y un caso integrador de arranque de motor.</p>
+    <span class="go">Abrir la presentación</span>
+    <span class="url">/presentacion/ · pantalla completa con F</span>
+  </div>
+  <ul class="gates" aria-label="Ejemplos de la presentación">
+    <li style="--c:#6AA8FF"><b>AND</b>Arranque con permisivos</li>
+    <li style="--c:#34E39A"><b>OR</b>Paros de emergencia</li>
+    <li style="--c:#FF7A6B"><b>NOT</b>Bomba de llenado</li>
+    <li style="--c:#B99AFF"><b>NAND</b>Disponibilidad del bombeo</li>
+    <li style="--c:#2DD4BF"><b>NOR</b>Luz de sistema listo</li>
+    <li style="--c:#FF7AB6"><b>XOR</b>Luz desde dos accesos</li>
+    <li style="--c:#7DD3FC"><b>XNOR</b>Sincronización con la red</li>
+  </ul>
+</a>
 
 <footer>
   <p>Material de apoyo — Fundamentos de Electrónica.</p>

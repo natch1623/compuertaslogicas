@@ -1,0 +1,144 @@
+/* =====================================================================
+   Acabado neón · tubo de neón industrial y fósforo de osciloscopio.
+   Solo en tipografía grande, indicadores y conductores energizados:
+   el texto de lectura se mantiene sin brillo.
+   ===================================================================== */
+:root{
+  --neon-1:0 0 1px rgba(255,255,255,.9);
+  --glow-s:color-mix(in oklab,var(--gc) 70%,transparent);
+  --glow-m:color-mix(in oklab,var(--gc) 45%,transparent);
+  --glow-l:color-mix(in oklab,var(--gc) 26%,transparent);
+}
+
+/* nombre de la compuerta: tubo encendido */
+.g-name{color:color-mix(in oklab,var(--gc) 45%,#FFFFFF);
+  text-shadow:var(--neon-1),0 0 8px var(--glow-s),0 0 22px var(--glow-m),0 0 56px var(--glow-l),0 0 110px var(--glow-l)}
+.trio .word span,.part-item b{text-shadow:0 0 10px var(--glow-m),0 0 30px var(--glow-l)}
+.part-item b{color:color-mix(in oklab,var(--gc) 55%,#FFFFFF)}
+
+/* letra fantasma: contorno de neón apagado */
+.ghost{-webkit-text-stroke:1.5px color-mix(in oklab,var(--gc) 26%,transparent);
+  filter:drop-shadow(0 0 18px color-mix(in oklab,var(--gc) 16%,transparent))}
+.part-num{-webkit-text-stroke:2px color-mix(in oklab,var(--gc) 34%,transparent);
+  filter:drop-shadow(0 0 22px color-mix(in oklab,var(--gc) 18%,transparent))}
+
+/* portada: el título queda encendido tras energizarse */
+@keyframes energize{
+  0%{color:transparent;-webkit-text-stroke-color:rgba(236,239,241,.24);text-shadow:none}
+  30%{color:#FFE7B8;-webkit-text-stroke-color:#FFB020;text-shadow:0 0 6px #fff,0 0 26px rgba(255,176,32,.95),0 0 70px rgba(255,176,32,.7)}
+  100%{color:#FFF6E2;-webkit-text-stroke-color:transparent;
+    text-shadow:var(--neon-1),0 0 10px rgba(255,176,32,.75),0 0 32px rgba(255,176,32,.45),0 0 90px rgba(255,176,32,.25)}}
+.is-out .mega .ch{color:#FFF6E2;text-shadow:var(--neon-1),0 0 10px rgba(255,176,32,.75),0 0 32px rgba(255,176,32,.45)}
+.cover-sub{text-shadow:0 0 24px rgba(255,176,32,.18)}
+
+/* etiquetas y fichas: reborde encendido */
+.chip{box-shadow:0 0 0 1px color-mix(in oklab,var(--gc) 16%,transparent),0 0 18px -4px var(--glow-m),inset 0 0 12px -6px var(--glow-s)}
+.chip b{box-shadow:0 0 14px -2px var(--glow-s)}
+.g-card,.stage,.logic,.int-right,.q-demo,.trio>.glass,.part-item{
+  border-color:color-mix(in oklab,var(--gc) 16%,rgba(205,218,228,.085));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),inset 0 0 26px -18px var(--glow-s),0 22px 44px -28px rgba(0,0,0,.95),0 0 34px -22px var(--glow-m)}
+.corners::after{filter:drop-shadow(0 0 4px var(--glow-m))}
+
+/* conductores energizados y lámparas: más bloom */
+.ld .w.hot{filter:drop-shadow(0 0 3px var(--hot)) drop-shadow(0 0 12px var(--hot-glow))}
+.gd .w.hot{filter:drop-shadow(0 0 3px var(--hot)) drop-shadow(0 0 11px var(--hot-glow))}
+.sym .w.hot{filter:drop-shadow(0 0 4px var(--hot)) drop-shadow(0 0 14px var(--hot-glow))}
+.ld.on .glow{opacity:.34}
+.lamp.on .halo{opacity:1;filter:blur(1px)}
+.gd .lampo.on{filter:drop-shadow(0 0 6px #FFC862) drop-shadow(0 0 22px rgba(255,176,32,.85))}
+.machine .on-ok{filter:drop-shadow(0 0 6px var(--ok)) drop-shadow(0 0 20px rgba(47,208,138,.6))}
+.scene .plate-t{filter:drop-shadow(0 0 6px rgba(0,0,0,.6))}
+
+/* rieles: tubo de neón real a los lados */
+.rails .rl{background:linear-gradient(transparent,rgba(255,176,32,.75) 10%,rgba(255,176,32,.75) 90%,transparent);
+  box-shadow:0 0 6px rgba(255,176,32,.9),0 0 18px rgba(255,176,32,.45),0 0 42px rgba(255,176,32,.22)}
+.rails .tl{text-shadow:0 0 10px rgba(255,176,32,.8)}
+.segs i.cur{box-shadow:0 0 8px var(--gc),0 0 22px color-mix(in oklab,var(--gc) 55%,transparent)}
+
+/* estado y resultados */
+.status[data-tone="ok"] b{text-shadow:0 0 12px rgba(47,208,138,.65)}
+.status[data-tone="bad"] b{text-shadow:0 0 12px rgba(240,70,78,.6)}
+.status[data-tone="warn"] b{text-shadow:0 0 12px rgba(255,176,32,.6)}
+.status[data-tone="ok"] i,.status[data-tone="bad"] i,.status[data-tone="warn"] i{box-shadow:0 0 10px currentColor,0 0 22px currentColor}
+.res.on{box-shadow:0 0 16px var(--hot-glow),0 0 40px rgba(255,176,32,.35)}
+.eq .new{text-shadow:0 0 18px var(--hot-glow)}
+.tabs button[aria-selected="true"]{text-shadow:0 0 14px color-mix(in oklab,var(--gc) 45%,transparent)}
+.tabs .ind{box-shadow:inset 0 0 14px -6px var(--glow-s),0 0 16px -8px var(--glow-m)}
+.sw[aria-pressed="true"] .key{box-shadow:0 0 16px var(--hot-glow)}
+.btn.solid{box-shadow:0 10px 30px -10px var(--hot-glow),0 0 26px -6px var(--hot-glow)}
+.opt.right{box-shadow:0 0 34px -6px rgba(47,208,138,.55),inset 0 0 22px -14px rgba(47,208,138,.9)}
+.dots i.right{box-shadow:0 0 12px rgba(47,208,138,.8)}
+.dock-num{text-shadow:0 0 14px var(--glow-m)}
+.tpill[data-state="warn"]{box-shadow:0 0 22px -8px var(--hot-glow)}
+.tpill[data-state="over"]{box-shadow:0 0 26px -6px rgba(240,70,78,.8)}
+
+/* fósforo del osciloscopio y del sincroscopio */
+.m-xnor .tr-g{filter:drop-shadow(0 0 4px rgba(125,211,252,.9)) drop-shadow(0 0 12px rgba(125,211,252,.45))}
+.m-xnor .tr-r{filter:drop-shadow(0 0 4px rgba(185,154,255,.9)) drop-shadow(0 0 12px rgba(185,154,255,.45))}
+.m-xnor .tr-y{filter:drop-shadow(0 0 4px var(--hot)) drop-shadow(0 0 14px var(--hot-glow))}
+.m-xnor .okarc{filter:drop-shadow(0 0 8px rgba(47,208,138,.8))}
+.m-xnor .ptr{filter:drop-shadow(0 0 6px var(--hot-glow))}
+.m-int .bus-flow{filter:drop-shadow(0 0 5px var(--hot-glow))}
+
+@media (prefers-reduced-motion:reduce){
+  .mega .ch,.is-active .mega .ch{color:#FFF6E2;text-shadow:var(--neon-1),0 0 10px rgba(255,176,32,.7),0 0 30px rgba(255,176,32,.4)}
+}
+
+/* ---------- neón pegado a las letras, no a la caja ---------- */
+/* el resplandor se aplica al trazo del texto: así no se recorta en la máscara */
+.g-name{text-shadow:none;
+  filter:drop-shadow(0 0 5px var(--glow-s)) drop-shadow(0 0 16px var(--glow-m)) drop-shadow(0 0 44px var(--glow-l))}
+.mega{filter:drop-shadow(0 0 30px rgba(255,176,32,.18))}
+.trio .word span{text-shadow:none;filter:drop-shadow(0 0 8px var(--glow-m))}
+.part-item b{text-shadow:none;filter:drop-shadow(0 0 8px var(--glow-m)) drop-shadow(0 0 22px var(--glow-l))}
+
+/* letra de fondo: contorno de neón que respira y deriva despacio */
+.ghost{-webkit-text-stroke:2px color-mix(in oklab,var(--gc) 34%,transparent);
+  filter:drop-shadow(0 0 6px color-mix(in oklab,var(--gc) 30%,transparent)) drop-shadow(0 0 26px color-mix(in oklab,var(--gc) 18%,transparent))}
+.is-active .ghost{animation:ghost-drift 26s var(--ease-io) infinite alternate}
+@keyframes ghost-drift{
+  0%{transform:translate3d(calc(var(--px,0px) + 10px),calc(var(--py,0px) + 6px),0) scale(1);opacity:.85}
+  35%{opacity:1}
+  50%{transform:translate3d(calc(var(--px,0px) - 14px),calc(var(--py,0px) - 10px),0) scale(1.035);opacity:.92}
+  100%{transform:translate3d(calc(var(--px,0px) + 6px),calc(var(--py,0px) - 4px),0) scale(1.01);opacity:1}}
+.part-num{-webkit-text-stroke:2.5px color-mix(in oklab,var(--gc) 40%,transparent)}
+.is-active .part-num{animation:ghost-drift 30s var(--ease-io) infinite alternate}
+
+/* ---------- fondo más oscuro para que el neón resalte ---------- */
+:root{--bg:#090C0F;--panel:#12171B;--grid:rgba(205,218,228,.026)}
+.glass{background:linear-gradient(180deg,#151A1F,#0F1317)}
+.slide::before{background:radial-gradient(130% 105% at 50% 38%,transparent 52%,rgba(0,0,0,.72))}
+.status{background:rgba(5,7,9,.86)}
+.eqbox{background:#0A0D10}
+.sw,.pb,.range,.ex{background:#11161A}
+.scen button{background:rgba(8,11,13,.82)}
+.deck{background:#05070A}
+
+@media (prefers-reduced-motion:reduce){
+  .is-active .ghost,.is-active .part-num{animation:none}
+}
+
+/* ---------- neón reforzado ---------- */
+/* nombre del frente: +30 % de radio e intensidad en cada capa */
+.g-name{filter:drop-shadow(0 0 7px var(--glow-s)) drop-shadow(0 0 21px var(--glow-s)) drop-shadow(0 0 57px var(--glow-m)) drop-shadow(0 0 96px var(--glow-l))}
+
+/* letra de fondo: tubo apagado pero claramente encendido, con vida propia */
+.ghost{--gh:color-mix(in oklab,var(--gc) 62%,transparent);
+  -webkit-text-stroke:3px var(--gh);
+  filter:drop-shadow(0 0 4px var(--gh)) drop-shadow(0 0 14px color-mix(in oklab,var(--gc) 42%,transparent)) drop-shadow(0 0 46px color-mix(in oklab,var(--gc) 26%,transparent));
+  opacity:.9}
+.is-active .ghost{animation:ghost-float 22s var(--ease-io) infinite alternate,ghost-buzz 7s ease-in-out infinite}
+/* deriva propia: ya no depende del mouse */
+@keyframes ghost-float{
+  0%{transform:translate3d(2%,18px,0) rotate(-1.2deg) scale(1)}
+  50%{transform:translate3d(-3%,-14px,0) rotate(.8deg) scale(1.05)}
+  100%{transform:translate3d(1%,10px,0) rotate(-.4deg) scale(1.02)}}
+/* parpadeo de tubo, muy leve */
+@keyframes ghost-buzz{0%,100%{opacity:.9}46%{opacity:.98}48%{opacity:.7}52%{opacity:.95}}
+.part-num{-webkit-text-stroke:3px color-mix(in oklab,var(--gc) 58%,transparent);
+  filter:drop-shadow(0 0 5px color-mix(in oklab,var(--gc) 45%,transparent)) drop-shadow(0 0 30px color-mix(in oklab,var(--gc) 26%,transparent))}
+.is-active .part-num{animation:ghost-float 28s var(--ease-io) infinite alternate}
+
+@media (prefers-reduced-motion:reduce){
+  .is-active .ghost,.is-active .part-num{animation:none}
+}

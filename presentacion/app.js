@@ -83,7 +83,7 @@ scopes.bridge = { enter() { ["b-and", "b-or", "b-not"].forEach(id => scopes[id].
   $("#intScene").innerHTML = SIMS.int.scene();
   const scene = $(".scene", stage);
   const v = { S: 0, P: 0, T: 0, M: 0 };
-  let step = 1;
+  let step = 1, intView = 0;
   const orN = { t: "p", c: [{ t: "no", v: "S", label: "START" }, { t: "no", v: "M", label: "KM" }], note: "OR · paralelo" };
   const andN = { t: "s", c: [{ t: "nc", v: "P", label: "STOP" }, { t: "nc", v: "T", label: "F" }], note: "AND + NOT · NC en serie" };
   const STEPS = [
@@ -99,8 +99,13 @@ scopes.bridge = { enter() { ["b-and", "b-or", "b-not"].forEach(id => scopes[id].
       v.M = (v.S || v.M) && !v.P && !v.T ? 1 : 0;
       if (prevM !== v.M) sfx.clack();
       scene.dataset.m = v.M; scene.dataset.t = v.T;
-      const tree = step === 1 ? { t: "s", c: [orN] } : { t: "s", c: [orN, andN] };
-      $("#intLadder").innerHTML = ladder(tree, v, { coil: "KM", notes: step === 4, draw: o.draw });
+      if (intView) {
+        const tree = step === 1 ? { t: "s", c: [orN] } : { t: "s", c: [orN, andN] };
+        $("#intLadder").innerHTML = ladder(tree, v, { coil: "KM", notes: step === 4, draw: o.draw });
+      } else {
+        $("#intLadder").innerHTML = LG.int.draw(v, step);
+      }
+      $("#intViewLbl").textContent = intView ? `Ladder · ${step === 4 ? "lectura en el tablero" : "contactos y bobina"}` : "Diagrama de compuertas · la salida se realimenta";
       $("#resetLbl").textContent = v.T ? "disparado · toca para rearmar" : "sin disparo";
     },
     setStep(k) {
@@ -130,6 +135,12 @@ scopes.bridge = { enter() { ["b-and", "b-or", "b-not"].forEach(id => scopes[id].
   const load = $("#load");
   load.addEventListener("input", () => { sc.st.load = +load.value / 100; $("#loadOut").textContent = load.value + " %"; });
   $$(".step", sec).forEach(b => b.addEventListener("click", () => { sfx.click(); sc.setStep(+b.dataset.step); }));
+  $$("[data-intview]", sec).forEach(b => b.addEventListener("click", () => {
+    intView = +b.dataset.intview;
+    $$("[data-intview]", sec).forEach(x => x.setAttribute("aria-pressed", x === b));
+    sfx.click();
+    sc.update({ draw: true });
+  }));
   $$("[data-hold]", sec).forEach(b => {
     const k = b.dataset.hold;
     const down = e => { e.preventDefault(); if (b.classList.contains("down")) return; b.classList.add("down"); v[k] = 1; sfx.click(); sc.update(); };
@@ -202,7 +213,7 @@ scopes.bridge = { enter() { ["b-and", "b-or", "b-not"].forEach(id => scopes[id].
         o.querySelector(".sym").outerHTML = gateSymbol(k, ins, GATE_FN[k](ins));
       } else o.classList.add(o === b ? "wrong" : "fade");
     });
-    fb.innerHTML = `<p><span class="${ok ? "yes" : "no"}">${ok ? "Correcto." : `Es ${ans.toUpperCase()}.`}</span> ${why}</p><button class="btn solid" id="qNext">${qi === Q.length - 1 ? "Ver resultado" : "Siguiente"} →</button>`;
+    fb.innerHTML = `<p><span class="${ok ? "yes" : "no"}">${ok ? "Correcto." : `Es ${ans.toUpperCase()}.`}</span> ${why}</p><button class="btn solid" id="qNext">${qi === Q.length - 1 ? "Ver resultado" : "Siguiente situación"}</button>`;
     $("#qNext").addEventListener("click", () => { qi++; render(); });
     $("#qNext").focus({ preventScroll: true });
     paintDots();
@@ -239,37 +250,83 @@ slides.forEach((s, i) => {
 $("#segs").innerHTML = slides.map(() => "<i></i>").join("");
 $("#overviewList").innerHTML = slides.map((s, i) => `<li style="--k:${i}"><button data-go="${i}" style="--gc:${s.style.getPropertyValue("--gc") || "var(--hot)"}"><span>${String(i + 1).padStart(2, "0")}</span>${s.dataset.title}</button></li>`).join("");
 
-function go(n, instant) {
-  n = clamp(n, 0, total - 1);
-  if (n === idx) return;
-  if (anim) anim.finish();
-  const from = slides[idx], to = slides[n], dir = n > idx ? 1 : -1;
+/* Transición entre diapositivas.
+   Con View Transitions: las partes que existen en ambas diapositivas (etiqueta,
+   nombre de la compuerta, historia, ficha, escenario, panel lógico, controles)
+   viajan a su nueva posición; el resto de la escena se desliza como un panel.
+   Sin soporte, se usa el deslizamiento con WAAPI. */
+const CAN_VT = typeof document.startViewTransition === "function";
+const VT_PARTS = [[".chip", "vt-chip"], [".g-name", "vt-name"], [".g-story", "vt-story"], [".g-card", "vt-card"],
+  [".stage", "vt-stage"], [".logic", "vt-logic"], [".controls", "vt-controls"], [".g-more", "vt-more"]];
+let vt = null;
+
+function activate(n, from, to) {
   idx = n;
   $$(".pop.open").forEach(p => p.classList.remove("open"));
   to.inert = false;
   to.scrollTop = 0;
   to.classList.add("is-active");
-  const sc = scopes[to.dataset.scope];
-  sc?.enter?.();
-  const gc = getComputedStyle(to).getPropertyValue("--gc");
-  document.documentElement.style.setProperty("--gc", gc);
+  scopes[to.dataset.scope]?.enter?.();
+  document.documentElement.style.setProperty("--gc", getComputedStyle(to).getPropertyValue("--gc"));
   $$("#segs i").forEach((s, i) => { s.className = i < n ? "past" : i === n ? "cur" : ""; });
   $("#dockNum").textContent = String(n + 1).padStart(2, "0");
-  const title = $("#dockTitle");
-  title.textContent = to.dataset.title;
+  $("#dockTitle").textContent = to.dataset.title;
   $("#notesTitle").textContent = `Notas · ${String(n + 1).padStart(2, "0")} ${to.dataset.title}`;
   $("#notesText").textContent = to.dataset.notes || "";
   $("#btnPrev").disabled = n === 0;
   $("#btnNext").disabled = n === total - 1;
   $$("#overviewList button").forEach((b, i) => b.setAttribute("aria-current", i === n));
+  document.documentElement.dataset.slide = n;
   history.replaceState(null, "", "#" + (n + 1));
   if (!from) return;
   from.classList.remove("is-active");
   from.inert = true;
+  $$("[data-vt-shared]", from).forEach(e => e.removeAttribute("data-vt-shared"));
   if (++navCount > 2) $("#keys").classList.add("gone");
   if (typeof presTimer !== "undefined") presTimer.onSlide(n);
-  if (instant || REDUCED.matches) {
-    if (!REDUCED.matches || instant) return;
+}
+
+function railPulse() {
+  $("#railPulse").animate([{ transform: "translateY(-140px)", opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { transform: `translateY(${innerHeight}px)`, opacity: 0 }],
+    { duration: 900, easing: "cubic-bezier(0.77, 0, 0.175, 1)" });
+}
+
+function go(n, instant) {
+  n = clamp(n, 0, total - 1);
+  if (n === idx) return;
+  if (anim) anim.finish();
+  vt?.skipTransition();
+  const from = slides[idx], to = slides[n], dir = n > idx ? 1 : -1;
+  const title = $("#dockTitle");
+
+  if (from && !instant && !REDUCED.matches && CAN_VT) {
+    const shared = VT_PARTS.filter(([s]) => $(s, from) && $(s, to));
+    const root = document.documentElement;
+    const type = to.dataset.trans || (shared.length >= 3 ? "quiet" : "push");
+    root.dataset.vtt = type;
+    root.dataset.vtd = dir;
+    root.style.setProperty("--vtd", dir);
+    root.style.setProperty("--irx", dir > 0 ? "3%" : "97%");
+    shared.forEach(([s, name]) => ($(s, from).style.viewTransitionName = name));
+    if (type === "blackout") sfx.clack(); else sfx.whoosh();
+    if (type !== "blackout" && type !== "flash") railPulse();
+    root.classList.add("vt-running");
+    vt = document.startViewTransition(() => {
+      shared.forEach(([s]) => ($(s, from).style.viewTransitionName = ""));
+      activate(n, from, to);
+      shared.forEach(([s, name]) => { const e = $(s, to); e.style.viewTransitionName = name; e.setAttribute("data-vt-shared", ""); });
+    });
+    const t = vt;
+    t.finished.finally(() => {
+      shared.forEach(([s]) => { const e = $(s, to); if (e) e.style.viewTransitionName = ""; });
+      if (vt === t) { vt = null; document.documentElement.classList.remove("vt-running"); }
+    });
+    return;
+  }
+
+  activate(n, from, to);
+  if (!from || instant) return;
+  if (REDUCED.matches) {
     from.classList.add("is-out");
     const a = to.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: "ease-out" });
     anim = { finish() { a.finish(); } };
@@ -280,10 +337,11 @@ function go(n, instant) {
   to.classList.add("moving");
   to.dataset.dir = dir;
   sfx.whoosh();
-  const E = "cubic-bezier(.77,0,.175,1)", D = 1000;
+  railPulse();
+  const E = "cubic-bezier(0.77, 0, 0.175, 1)", D = 850;
   const a1 = to.animate([{ transform: `translate3d(${dir * 100}%,0,0)` }, { transform: "translate3d(0,0,0)" }], { duration: D, easing: E });
   const a2 = from.animate([{ transform: "none", opacity: 1, filter: "brightness(1)" }, { transform: `translate3d(${-dir * 30}%,0,0) scale(.9)`, opacity: 0.25, filter: "brightness(.45)" }], { duration: D, easing: E });
-  title.animate([{ opacity: 0, transform: `translateX(${dir * 12}px)`, filter: "blur(4px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 420, easing: "cubic-bezier(.23,1,.32,1)" });
+  title.animate([{ opacity: 0, transform: `translateX(${dir * 12}px)`, filter: "blur(4px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 420, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
   let done = false;
   const finish = () => { if (done) return; done = true; from.classList.remove("is-out"); to.classList.remove("moving"); anim = null; };
   anim = { finish() { a1.finish(); a2.finish(); finish(); } };
@@ -373,14 +431,27 @@ document.addEventListener("keydown", e => {
   wake();
 }
 
-/* paralaje suave de la letra fantasma */
-addEventListener("pointermove", e => {
-  const s = slides[idx];
-  const gh = s && $(".ghost", s);
-  if (!gh || REDUCED.matches) return;
-  gh.style.setProperty("--px", f1((e.clientX / innerWidth - 0.5) * -24) + "px");
-  gh.style.setProperty("--py", f1((e.clientY / innerHeight - 0.5) * -14) + "px");
-}, { passive: true });
+/* pantalla completa: la barra de abajo se retira y vuelve al bajar el mouse */
+{
+  const body = document.body, dock = $("#dock");
+  const BAND = 120;                     /* franja sensible del borde inferior */
+  const fine = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
+  /* el foco solo la retiene si se llegó con el teclado: tras un clic el botón
+     conserva el foco y la barra se quedaba pegada al cambiar de diapositiva */
+  const kb = () => { const a = document.activeElement; return dock.contains(a) && a.matches?.(":focus-visible"); };
+  const held = () => dock.matches(":hover") || kb()
+    || $("#notes").classList.contains("open") || $("#overview").classList.contains("open");
+  let py = -1;                          /* última posición vertical del puntero */
+  const near = () => body.classList.toggle("dock-near", (py > innerHeight - BAND && py >= 0) || held());
+  addEventListener("pointermove", e => { py = e.clientY; if (body.classList.contains("fs")) near(); }, { passive: true });
+  addEventListener("focusin", () => { if (body.classList.contains("fs") && held()) body.classList.add("dock-near"); });
+  document.addEventListener("fullscreenchange", () => {
+    const on = !!document.fullscreenElement && fine();
+    body.classList.toggle("fs", on);
+    on ? near() : body.classList.remove("dock-near");
+    $("#btnFull").setAttribute("aria-pressed", !!document.fullscreenElement);
+  });
+}
 
 /* bucle: solo simula la diapositiva visible */
 {
@@ -398,3 +469,23 @@ addEventListener("pointermove", e => {
 
 addEventListener("hashchange", () => go((parseInt(location.hash.slice(1), 10) || 1) - 1));
 go((parseInt(location.hash.slice(1), 10) || 1) - 1, true);
+
+/* la banda de la tabla se recoloca si cambia la tipografía o el tamaño */
+(document.fonts?.ready || Promise.resolve()).then(() => GATES.forEach(g => scopes[g.id].placeRow()));
+addEventListener("resize", () => GATES.forEach(g => scopes[g.id].placeRow()), { passive: true });
+
+/* rótulos grabados: una placa detrás de cada nombre de componente centrado */
+(document.fonts?.ready || Promise.resolve()).then(() => {
+  $$(".scene text.lbl[text-anchor='middle']:not(.dim):not([id])").forEach(t => {
+    if (t.closest(".gin") || t.classList.contains("warn-t") || t.classList.contains("ft")) return;
+    t.classList.add("on-plate");
+    const b = t.getBBox();
+    if (!b.width) return t.classList.remove("on-plate");
+    const r = document.createElementNS(SVGNS, "rect");
+    r.setAttribute("class", "plate-t");
+    r.setAttribute("x", f1(b.x - 5)); r.setAttribute("y", f1(b.y - 2.5));
+    r.setAttribute("width", f1(b.width + 10)); r.setAttribute("height", f1(b.height + 5));
+    r.setAttribute("rx", 2);
+    t.before(r);
+  });
+});

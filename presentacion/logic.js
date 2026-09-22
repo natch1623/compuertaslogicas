@@ -139,6 +139,37 @@ const LG = {};
     }
   };
 
+  /* Caso integrador · M = (S + M) · P̄ · T̄ con realimentación de autorretención */
+  LG.int = {
+    draw(v, step) {
+      const S = B(v.S), P = B(v.P), T = B(v.T), M = B(v.M);
+      const or1 = S || M, np = !P, nt = !T;
+      if (step === 1) {
+        const o = place("or", 250, 60, [S, M], or1, 1.4);
+        let s = wire([63.5, o.pin[0][1]], o.pin[0], S, 190) + inNode("S", S, o.pin[0][1], false)
+          + net(o.out[0] + 8, o.out[1] - 12, "S + M", or1)
+          + outNode("M", or1, o.out)
+          + path(`M520 ${f1(o.out[1])}V250H150V${f1(o.pin[1][1])}H${f1(o.pin[1][0])}`, or1) + jn(520, o.out[1], or1)
+          + net(300, 268, "realimentación KM", or1);
+        return svg(285, s + o.svg);
+      }
+      const o = place("or", 190, 30, [S, M], or1, 1.2);
+      const gp = place("not", 210, 150, [P], np), gt = place("not", 210, 210, [T], nt);
+      const a = place("and", 410, 118, [or1, np, nt], M, 1.1);
+      let s = wire([63.5, o.pin[0][1]], o.pin[0], S, 150) + inNode("S", S, o.pin[0][1], false)
+        + wire([63.5, 190], gp.pin[0], P, 150) + inNode("P", P, 190, false)
+        + wire([63.5, 250], gt.pin[0], T, 150) + inNode("T", T, 250, false)
+        + wire(o.out, a.pin[0], or1, 382) + wire(gp.out, a.pin[1], np, 378) + wire(gt.out, a.pin[2], nt, 362)
+        + net(o.out[0] + 6, o.out[1] - 12, "S + M", or1)
+        + net(348, 182, `${ovs("P")}`, np) + net(348, 242, `${ovs("T")}`, nt)
+        + path(`M${f1(a.out[0] + 10)} ${f1(a.out[1])}V294H150V${f1(o.pin[1][1])}H${f1(o.pin[1][0])}`, M) + jn(a.out[0] + 10, a.out[1], M)
+        + net(300, 286, "realimentación KM", M)
+        + outNode("M", M, a.out);
+      return svg(310, s + o.svg + gp.svg + gt.svg + a.svg);
+    },
+    eq: () => ""
+  };
+
   function row(label, code, cls = "") {
     return `<div class="eq-row ${cls}"><span class="lbl">${label}</span><code>${code}</code></div>`;
   }
