@@ -105,6 +105,21 @@ h1{
 .feature .go::after{content:"→";display:inline-block;margin-left:.3em;transition:transform .16s}
 .feature:hover .go::after{transform:translateX(4px)}
 .feature .url{display:block;margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:#5E7285}
+/* variante: presentación 2, tema de agua */
+.feature.hydro{background:linear-gradient(160deg,#F4F8FF,#DCEAFF);border-color:rgba(205,163,73,.55);color:#1D275C;
+  box-shadow:0 0 40px -24px rgba(62,123,250,.7)}
+.feature.hydro::before{background:radial-gradient(circle at 85% 20%,rgba(255,255,255,.9) 0 3%,transparent 3.5%),radial-gradient(circle at 92% 70%,rgba(127,178,255,.35) 0 6%,transparent 6.5%),radial-gradient(circle at 70% 88%,rgba(127,178,255,.3) 0 3%,transparent 3.5%),radial-gradient(70% 90% at 100% 0%,rgba(62,123,250,.18),transparent 70%)}
+.feature.hydro:hover{border-color:#CDA349;box-shadow:0 0 56px -22px rgba(62,123,250,.8)}
+.feature.hydro .tag,.feature.hydro .go{color:#3E7BFA}
+.feature.hydro .tag::before{background:#CDA349;box-shadow:0 0 8px #E9CF8C}
+.feature.hydro h2{color:#26327A;filter:none;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700}
+.feature.hydro p{color:#475894}
+.feature.hydro .url{color:#7483B8}
+.feature.hydro .gates li{color:#475894;background:rgba(255,255,255,.8);border-color:rgba(62,123,250,.18)}
+.feature.hydro .gates b{color:var(--c);text-shadow:none}
+.feature.hydro>*{min-width:0}
+.feature.hydro .gates{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
+.feature.hydro .gates li:last-child{grid-column:auto}
 .gates{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .gates li{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
   padding:9px 12px;border:1px solid rgba(205,218,228,.09);border-radius:8px;background:rgba(18,23,27,.8);font-size:.84rem;color:var(--cold)}
@@ -190,6 +205,25 @@ footer p{margin:0 0 6px;max-width:70ch}
     <li style="--c:#2DD4BF"><b>NOR</b>Luz de sistema listo</li>
     <li style="--c:#FF7AB6"><b>XOR</b>Luz desde dos accesos</li>
     <li style="--c:#7DD3FC"><b>XNOR</b>Sincronización con la red</li>
+  </ul>
+</a>
+
+<a class="feature hydro" href="presentacion-2/">
+  <div>
+    <span class="tag">Presentación 2 · alternativa</span>
+    <h2>Compuertas en aplicaciones reales</h2>
+    <p>Siete casos mixtos simulados en vivo: prensa con bypass, alarma de intrusión, iluminación nocturna, tanque con panel, climatización, escalera y alarma de discrepancia. Con tabla de verdad, compuertas por etapas y ecuación booleana.</p>
+    <span class="go">Abrir la presentación 2</span>
+    <span class="url">/presentacion-2/ · pantalla completa con F</span>
+  </div>
+  <ul class="gates" aria-label="Casos de la presentación 2">
+    <li style="--c:#3F5FE0"><b>AND+OR</b>Prensa con bypass</li>
+    <li style="--c:#1797A8"><b>OR+AND</b>Alarma de intrusión</li>
+    <li style="--c:#D9486E"><b>NOT</b>Iluminación nocturna</li>
+    <li style="--c:#7457E0"><b>NAND+AND</b>Llenado de tanque</li>
+    <li style="--c:#2E86D1"><b>NOR+XOR</b>Climatización</li>
+    <li style="--c:#B24CC4"><b>XOR</b>Interruptor de escalera</li>
+    <li style="--c:#2F6FC4"><b>XNOR+NOR</b>Alarma de discrepancia</li>
   </ul>
 </a>
 

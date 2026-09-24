@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compuertas en aplicaciones reales</title>
+<meta name="description" content="Presentación interactiva: siete compuertas lógicas aplicadas a problemas reales de ingeniería electromecánica e industrial, con simulación, tabla de verdad y diagrama de compuertas.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230F1B2D'/><path d='M14 14h18a18 18 0 0 1 0 36H14z' fill='none' stroke='%23F26B1D' stroke-width='5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#EEF2F6">
+<link rel="stylesheet" href="deck.css">
+<link rel="stylesheet" href="deck-v3.css">
+<link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="extra.css">
+<link rel="stylesheet" href="claro.css">
+<link rel="stylesheet" href="furina.css">
+</head>
+<body>
+
+<div class="segs" id="segs" aria-hidden="true"></div>
+<div class="rails" aria-hidden="true"><i class="rl"></i><i class="rn"></i><i class="pulse" id="railPulse"></i><b class="tl">L</b><b class="tn">N</b></div>
+<header class="chrome">
+  <a class="brand" href="../"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 14h18a18 18 0 0 1 0 36H14z" fill="none" stroke="#F26B1D" stroke-width="6"/></svg><span>Compuertas lógicas · Aplicaciones reales</span></a>
+  <div class="timerbox" id="timerbox">
+    <button class="tpill" id="tpill" aria-haspopup="true" aria-expanded="false" title="Empieza al pasar a la diapositiva 2 · T pausa">
+      <span class="tdot" aria-hidden="true"></span><span class="tnow" id="tnow">00:00</span><span class="tlim" id="tlim">/ 45:00</span>
+      <span class="tbar" aria-hidden="true"><i id="tbarI"></i></span>
+    </button>
+    <div class="tmenu" id="tmenu">
+      <p class="lbl">Tiempo límite (minutos)</p>
+      <div class="tlims" id="tlims"></div>
+      <form class="tcustom" id="tcustom" novalidate>
+        <label for="tmin">Otro</label>
+        <input id="tmin" type="number" inputmode="numeric" min="1" max="240" step="1" value="45" aria-describedby="terr">
+        <span>min</span>
+        <button type="submit">Aplicar</button>
+      </form>
+      <p class="terr" id="terr" aria-live="polite"></p>
+      <div class="tacts"><button id="tpause">Pausar</button><button id="treset">Reiniciar</button></div>
+      <p class="tnote">Arranca al pasar a la diapositiva 2. Avisa cuando quedan 5 y 1 minuto. Tecla <kbd>T</kbd>: pausar o reanudar.</p>
+    </div>
+  </div>
+</header>
+
+<main class="deck" id="deck">
+  <div class="hydro" id="hydro" aria-hidden="true"></div>
+
+  <section class="slide s-blank" style="--gc:var(--hot)" data-title="Pantalla de espera"
+    data-notes="Pantalla de espera en blanco: déjala mientras acomodas el proyector y saludas al grupo. Al pasar a la portada se ve la animación de entrada y arranca el cronómetro.">
+    <p class="blank-hint" data-a>Presiona <kbd>→</kbd> para comenzar</p>
+  </section>
+
+  <section class="slide s-cover" data-trans="blackout" style="--gc:var(--hot)" data-title="Portada"
+    data-notes="Presentación de la actividad: siete compuertas lógicas aplicadas a problemas reales de ingeniería electromecánica e industrial. Tecla S: activa el sonido (prensa, sirenas, alarmas).">
+    <div class="cover-glow abs" aria-hidden="true"></div>
+    <div class="floor abs" aria-hidden="true"><div class="floor-plane"><div class="floor-grid"></div></div></div>
+    <div class="cover-in">
+      <span class="chip" data-a>Universidad Tecnológica de Panamá · Centro Regional de Panamá Oeste</span>
+      <h1 class="mega"><span class="split">Compuertas</span><span class="split" data-ci0="10">lógicas</span></h1>
+      <p class="cover-sub" data-a>en aplicaciones reales · Actividad de Aprendizaje No. 1</p>
+      <div class="gate-row" id="gateRow" data-a></div>
+      <p class="cover-inst" data-a>Licenciatura en Ingeniería Electromecánica</p>
+      <div class="cover-meta" data-a><span>Estudiantes <b>Joed Ayarza</b> y <b>Saúl Magallón</b></span><span>Facilitadora <b>Ing. Mónica Magallón Mariscal, M.Sc.</b></span><span>Entrega <b>23 de septiembre de 2026</b></span></div>
+    </div>
+  </section>
+
+  <section class="slide s-intro" style="--gc:var(--hot)" data-title="Las compuertas como decisiones físicas" data-scope="intro"
+    data-notes="Las siete compuertas se agrupan en básicas (AND, OR, NOT), negadas (NAND, NOR), que además son universales, y exclusivas (XOR, XNOR). Toca cualquier compuerta para ir directo a su caso. Referencia: Floyd (2016), cap. 3; Mano y Ciletti (2013), cap. 2.">
+    <span class="chip" data-a style="align-self:flex-start">Introducción</span>
+    <h2 class="h-mid"><span class="split">Las compuertas como decisiones físicas</span></h2>
+    <div class="intro-grid">
+      <div class="intro-text" data-a>
+        <p class="lead">Las compuertas lógicas son los bloques fundamentales de todo sistema digital.</p>
+        <p>En teoría son operadores del álgebra de Boole; en la práctica representan condiciones de seguridad, alarmas y automatizaciones.</p>
+        <div class="method glass corners">
+          <p class="kicker">Para cada compuerta se analiza</p>
+          <ol><li>Aplicación</li><li>Problema que resuelve</li><li>Entradas y salida</li><li>Función lógica</li><li>Tabla de verdad</li></ol>
+          <p>Cinco casos son sistemas mixtos de dos etapas, con una tercera entrada de control.</p>
+        </div>
+      </div>
+      <div class="groups">
+        <div class="group glass corners" style="--gc:var(--c-and)" data-a="scale"><p class="kicker">Básicas</p><div class="g-items" data-ks="and,or,not"></div></div>
+        <div class="group glass corners" style="--gc:var(--c-nand)" data-a="scale"><p class="kicker">Negadas (universales)</p><div class="g-items" data-ks="nand,nor"></div></div>
+        <div class="group glass corners" style="--gc:var(--c-xor)" data-a="scale"><p class="kicker">Exclusivas</p><div class="g-items" data-ks="xor,xnor"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide s-chain" style="--gc:var(--c-or)" data-title="Del mundo físico al 0 y al 1" data-scope="chain"
+    data-notes="Todo sistema de control digital sigue la cadena entrada, decisión y salida. Presiona los pulsadores y cambia la compuerta: la señal recorre la cadena. Es importante definir qué significa 1 en cada entrada y qué significa 1 en la salida, porque no siempre coinciden (por ejemplo, en la NOT del alumbrado). Referencia: Tocci, Widmer y Moss (2007), cap. 1.">
+    <span class="chip" data-a style="align-self:flex-start">Cadena de control</span>
+    <h2 class="h-mid"><span class="split">Del mundo físico al 0 y al 1</span></h2>
+    <div class="chain">
+      <div class="link glass corners" style="--gc:var(--c-and)" data-a="scale"><span class="step-n">01</span><p class="kicker">Entrada</p><h3>Sensor o pulsador</h3><div class="cz" id="chIn"></div><p>Convierte una condición física en un nivel lógico: presionado, abierto, hay luz.</p></div>
+      <div class="arrow" id="chA1" aria-hidden="true"><i></i></div>
+      <div class="link glass corners" style="--gc:var(--hot)" data-a="scale"><span class="step-n">02</span><p class="kicker">Decisión</p><h3>Compuerta lógica</h3>
+        <div class="seg" role="group" aria-label="Compuerta"><button data-chg="and" aria-pressed="true">A · B</button><button data-chg="or" aria-pressed="false">A + B</button><button data-chg="not" aria-pressed="false">A′</button></div>
+        <div class="cz" id="chGate"></div><p>Aplica la función booleana que resuelve el problema: A · B, A + B, A′…</p></div>
+      <div class="arrow" id="chA2" aria-hidden="true"><i></i></div>
+      <div class="link glass corners" style="--gc:var(--ok)" data-a="scale"><span class="step-n">03</span><p class="kicker">Salida</p><h3>Actuador</h3><div class="cz" id="chOut"></div><p>El nivel lógico resultante acciona un equipo: motor, sirena, lámpara, bomba.</p></div>
+    </div>
+    <div class="posnote" data-a><span class="kicker">Lógica positiva</span><p>1 indica que la condición está presente (pulsador presionado, sensor activo, equipo encendido) y 0 que está ausente. Entradas y salida se interpretan por separado.</p></div>
+  </section>
+
+  <section class="slide gate" data-gate="and"></section>
+  <section class="slide gate" data-gate="or"></section>
+  <section class="slide gate" data-gate="not"></section>
+  <section class="slide gate" data-gate="nand"></section>
+  <section class="slide gate" data-gate="nor"></section>
+  <section class="slide gate" data-gate="xor"></section>
+  <section class="slide gate" data-gate="xnor"></section>
+
+  <section class="slide s-sum" style="--gc:var(--hot)" data-title="Resumen" data-scope="sum" data-trans="iris"
+    data-notes="Tabla de repaso para comparar las siete compuertas. La columna central resume la condición de salida en 1 de cada una. Toca una fila para volver a su caso.">
+    <span class="chip" data-a style="align-self:flex-start">Resumen</span>
+    <h2 class="h-mid"><span class="split">Siete compuertas, siete decisiones</span></h2>
+    <div class="sum glass corners" data-a="scale">
+      <table class="sumt"><thead><tr><th>Compuerta</th><th>Expresión</th><th>La salida vale 1 cuando…</th><th>Aplicación</th></tr></thead><tbody id="sumBody"></tbody></table>
+    </div>
+    <p class="foot" data-a>Notación: A′ indica complemento (NOT) y ⊙ indica XNOR, según Mano y Ciletti (2013). Toca una fila para volver a su caso.</p>
+  </section>
+
+  <section class="slide s-concl" style="--gc:var(--hot)" data-title="Conclusiones" data-scope="concl" data-trans="wipe"
+    data-notes="Cierre: la relación entre operaciones lógicas y sistemas reales va más allá del aula; el criterio de diseño depende de interpretar correctamente cada tabla de verdad.">
+    <span class="chip" data-a style="align-self:flex-start">Para llevar</span>
+    <h2 class="closing"><span class="split">Conclusiones</span></h2>
+    <div class="concl">
+      <div class="glass corners" data-a="scale"><span class="n">01</span><div class="cz" data-cz="0"></div><p>Los 0 y 1 abstractos se traducen en <b>acciones físicas</b>: encender un motor, activar una alarma, evitar un accidente.</p></div>
+      <div class="glass corners" data-a="scale"><span class="n">02</span><div class="cz" data-cz="1"></div><p>Elegir bien la compuerta define la <b>lógica de decisión autónoma</b> de un equipo, sin necesidad de un microprocesador.</p></div>
+      <div class="glass corners" data-a="scale"><span class="n">03</span><div class="cz" data-cz="2"></div><p>Un error en la tabla de verdad puede significar <b>la falla de un equipo</b> o un riesgo para las personas.</p></div>
+    </div>
+  </section>
+
+  <section class="slide s-close" style="--gc:var(--hot)" data-title="Referencias" data-trans="blackout"
+    data-notes="Deja la bibliografía visible mientras respondes preguntas.">
+    <span class="chip" data-a style="align-self:flex-start">Bibliografía</span>
+    <h2 class="closing"><span class="split">Referencias</span></h2>
+    <ol class="refs ieee" data-a>
+      <li><span>[1]</span><p style="margin:0">T. L. Floyd, <i>Fundamentos de Sistemas Digitales</i>, 11a ed. Madrid, España: Pearson Educación, 2016.</p></li>
+      <li><span>[2]</span><p style="margin:0">R. J. Tocci, N. S. Widmer y G. L. Moss, <i>Sistemas Digitales: Principios y Aplicaciones</i>, 10a ed. México: Pearson Educación, 2007.</p></li>
+      <li><span>[3]</span><p style="margin:0">M. M. Mano y M. D. Ciletti, <i>Diseño Digital</i>, 5a ed. México: Pearson Educación, 2013.</p></li>
+      <li><span>[4]</span><p style="margin:0">C. H. Roth Jr. y L. L. Kinney, <i>Fundamentos de Diseño Lógico</i>, 7a ed. México: Cengage Learning, 2014.</p></li>
+      <li><span>[5]</span><p style="margin:0">W. Kleitz, <i>Electrónica Digital: Una introducción práctica</i>, 8a ed. México: Pearson Educación, 2009.</p></li>
+    </ol>
+  </section>
+
+</main>
+
+<p class="keys" id="keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> navegar · <kbd>N</kbd> notas · <kbd>O</kbd> índice · <kbd>S</kbd> sonido · <kbd>T</kbd> cronómetro · <kbd>F</kbd> pantalla</p>
+<div class="ttoast" id="ttoast" role="status" aria-live="assertive"></div>
+
+<nav class="dock" id="dock" aria-label="Controles de la presentación">
+  <button class="ic nav" id="btnPrev" aria-label="Diapositiva anterior"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div class="dock-info" aria-live="polite"><span class="dock-num" id="dockNum">01</span><span class="dock-title" id="dockTitle">Portada</span></div>
+  <button class="ic nav" id="btnNext" aria-label="Diapositiva siguiente"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+  <i class="dock-sep"></i>
+  <button class="ic" id="btnOverview" aria-label="Índice (O)" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+  <button class="ic" id="btnNotes" aria-label="Notas del docente (N)" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></button>
+  <button class="ic" id="btnSound" aria-label="Sonido (S)" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4z"/><path class="wave" d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12" style="display:none"/><path class="mute" d="M22 9l-6 6M16 9l6 6"/></svg></button>
+  <button class="ic" id="btnFull" aria-pressed="false" aria-label="Pantalla completa (F)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</nav>
+
+<aside class="notes" id="notes" aria-live="polite">
+  <div class="notes-top"><p class="lbl" id="notesTitle">Notas del expositor</p><span class="timer" id="timer">00:00</span></div>
+  <p id="notesText"></p>
+</aside>
+
+<div class="overview" id="overview" role="dialog" aria-modal="true" aria-label="Índice de diapositivas">
+  <h2>Índice</h2>
+  <ol id="overviewList"></ol>
+</div>
+
+<script src="core.js"></script>
+<script src="scenes.js"></script>
+<script src="logic.js"></script>
+<script src="gates.js"></script>
+<script src="app.js"></script>
+<script src="timer.js"></script>
+</body>
+</html>
